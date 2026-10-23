@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Bookshop API",
+    "version": "1.0.0",
+    "description": "JSON:API 1.1 bookshop API. Every response except the CSV report and 204 is a JSON:API document."
+  },
+  "servers": [{ "url": "http://localhost:8089" }],
+  "paths": {
+    "/openapi.json": {
+      "get": {
+        "summary": "This OpenAPI document",
+        "operationId": "getOpenApi",
+        "responses": {
+          "200": { "description": "The OpenAPI document", "content": { "application/vnd.api+json": { "schema": { "type": "object" } } } }
+        }
+      }
+    },
+    "/authors": {
+      "get": {
+        "summary": "List authors",
+        "operationId": "listAuthors",
+        "parameters": [
+          { "$ref": "#/components/parameters/Include" },
+          { "$ref": "#/components/parameters/PageNumber" },
+          { "$ref": "#/components/parameters/PageSize" }
+        ],
+        "responses": {
+          "200": { "description": "A page of authors", "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/AuthorList" } } } },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/authors/{id}": {
+      "get": {
+        "summary": "Get an author with its published books",
+        "operationId": "getAuthor",
+        "parameters": [
+          { "$ref": "#/components/parameters/Id" },
+          { "$ref": "#/components/parameters/Include" }
+        ],
+        "responses": {
+          "200": { "description": "The author", "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/AuthorDocument" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/books": {
+      "get": {
+        "summary": "List published books",
+        "operationId": "listBooks",
+        "parameters": [
+          { "name": "filter[title]", "in": "query", "description": "Title contains the text, case-insensitive", "schema": { "type": "string" } },
+          { "name": "filter[author]", "in": "query", "description": "Author name, exact", "schema": { "type": "string" } },
+          { "name": "filter[minPrice]", "in": "query", "description": "Minimum price in cents, inclusive", "schema": { "type": "integer" } },
+          { "name": "filter[maxPrice]", "in": "query", "description": "Maximum price in cents, inclusive", "schema": { "type": "integer" } },
+          { "name": "filter[publishedAfter]", "in": "query", "description": "Published on or after this date", "schema": { "type": "string", "format": "date" } },
+          { "name": "filter[publishedBefore]", "in": "query", "description": "Published on or before this date", "schema": { "type": "string", "format": "date" } },
+          { "name": "filter[inStock]", "in": "query", "description": "true: stock above 0; false: stock 0", "schema": { "type": "boolean" } },
+          { "name": "sort", "in": "query", "description": "Comma separated priceCents, title, publishedAt; prefix - for descending. Ties broken by id ascending.", "schema": { "type": "string", "example": "-priceCents,title" } },
+          { "$ref": "#/components/parameters/Include" },
+          { "$ref": "#/components/parameters/PageNumber" },
+          { "$ref": "#/components/parameters/PageSize" }
+        ],
+        "responses": {
+          "200": { "description": "A page of books", "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/BookList" } } } },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "summary": "Get a published book",
+        "operationId": "getBook",
+        "parameters": [
+          { "$ref": "#/components/parameters/Id" },
+          { "$ref": "#/components/parameters/Include" }
+        ],
+        "responses": {
+          "200": { "description": "The book", "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/BookDocument" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "patch": {
+        "summary": "Partially update a book, published or not",
+        "operationId": "updateBook",
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/BookPatch" } } }
+        },
+        "responses": {
+          "200": { "description": "The updated book (published books)", "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/BookDocument" } } } },
+          "204": { "description": "Updated; the book is unpublished, so no document is returned" },
+          "400": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "415": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/purchases": {
+      "get": {
+        "summary": "List the customer's purchases, most recent first",
+        "operationId": "listPurchases",
+        "parameters": [
+          { "$ref": "#/components/parameters/CustomerId" },
+          { "name": "sort", "in": "query", "description": "Comma separated createdAt, totalCents; prefix - for descending", "schema": { "type": "string" } },
+          { "$ref": "#/components/parameters/PageNumber" },
+          { "$ref": "#/components/parameters/PageSize" }
+        ],
+        "responses": {
+          "200": { "description": "A page of purchases", "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/PurchaseList" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "post": {
+        "summary": "Buy books",
+        "operationId": "createPurchase",
+        "parameters": [{ "$ref": "#/components/parameters/CustomerId" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/PurchaseCreate" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Purchase placed; Location holds its URL",
+            "headers": { "Location": { "schema": { "type": "string" } } },
+            "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/PurchaseDocument" } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "402": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "415": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" },
+          "502": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/purchases/{id}": {
+      "get": {
+        "summary": "Get one of the customer's purchases",
+        "operationId": "getPurchase",
+        "parameters": [
+          { "$ref": "#/components/parameters/CustomerId" },
+          { "$ref": "#/components/parameters/Id" }
+        ],
+        "responses": {
+          "200": { "description": "The purchase", "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/PurchaseDocument" } } } },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/reports/sales": {
+      "get": {
+        "summary": "Sales report between two dates, as CSV",
+        "operationId": "salesReport",
+        "parameters": [
+          { "name": "from", "in": "query", "required": true, "description": "First day, included", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "required": true, "description": "Last day, included", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV with columns title, quantity, revenueCents",
+            "content": { "text/csv": { "schema": { "type": "string" } } }
+          },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Id": { "name": "id", "in": "path", "required": true, "description": "Resource id; malformed ids answer 404", "schema": { "type": "string" } },
+      "Include": { "name": "include", "in": "query", "description": "Related resources to include in `included`. Unknown paths answer 400.", "schema": { "type": "string", "example": "author" } },
+      "PageNumber": { "name": "page[number]", "in": "query", "description": "Page number, from 1", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+      "PageSize": { "name": "page[size]", "in": "query", "description": "Items per page, from 1 to 50", "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 10 } },
+      "CustomerId": { "name": "Customer-Id", "in": "header", "required": true, "description": "Id of the customer making the request", "schema": { "type": "integer", "minimum": 1 } }
+    },
+    "responses": {
+      "Error": {
+        "description": "JSON:API error document",
+        "content": { "application/vnd.api+json": { "schema": { "$ref": "#/components/schemas/Errors" } } }
+      }
+    },
+    "schemas": {
+      "Errors": {
+        "type": "object",
+        "required": ["errors"],
+        "properties": {
+          "errors": { "type": "array", "items": { "$ref": "#/components/schemas/Error" } }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["status", "title", "detail"],
+        "properties": {
+          "status": { "type": "string" },
+          "title": { "type": "string" },
+          "detail": { "type": "string" },
+          "source": {
+            "type": "object",
+            "properties": {
+              "pointer": { "type": "string" },
+              "parameter": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Links": {
+        "type": "object",
+        "properties": {
+          "self": { "type": "string" },
+          "first": { "type": "string", "nullable": true },
+          "last": { "type": "string", "nullable": true },
+          "prev": { "type": "string", "nullable": true },
+          "next": { "type": "string", "nullable": true }
+        }
+      },
+      "AuthorAttributes": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "nullable": true },
+          "publishedBooks": { "type": "integer" }
+        }
+      },
+      "AuthorResource": {
+        "type": "object",
+        "required": ["type", "id", "attributes"],
+        "properties": {
+          "type": { "type": "string", "enum": ["authors"] },
+          "id": { "type": "string" },
+          "attributes": { "$ref": "#/components/schemas/AuthorAttributes" },
+          "relationships": {
+            "type": "object",
+            "properties": {
+              "books": { "$ref": "#/components/schemas/ToManyLinkage" }
+            }
+          },
+          "links": { "$ref": "#/components/schemas/ResourceLinks" }
+        }
+      },
+      "BookAttributes": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "priceCents": { "type": "integer" },
+          "publishedAt": { "type": "string", "format": "date", "nullable": true },
+          "stock": { "type": "integer" }
+        }
+      },
+      "BookResource": {
+        "type": "object",
+        "required": ["type", "id", "attributes"],
+        "properties": {
+          "type": { "type": "string", "enum": ["books"] },
+          "id": { "type": "string" },
+          "attributes": { "$ref": "#/components/schemas/BookAttributes" },
+          "relationships": {
+            "type": "object",
+            "properties": {
+              "author": { "$ref": "#/components/schemas/ToOneLinkage" }
+            }
+          },
+          "links": { "$ref": "#/components/schemas/ResourceLinks" }
+        }
+      },
+      "PurchaseLine": {
+        "type": "object",
+        "properties": {
+          "bookId": { "type": "integer" },
+          "title": { "type": "string" },
+          "quantity": { "type": "integer" },
+          "unitPriceCents": { "type": "integer" }
+        }
+      },
+      "PurchaseAttributes": {
+        "type": "object",
+        "properties": {
+          "createdAt": { "type": "string", "format": "date-time" },
+          "totalCents": { "type": "integer" },
+          "lines": { "type": "array", "items": { "$ref": "#/components/schemas/PurchaseLine" } }
+        }
+      },
+      "PurchaseResource": {
+        "type": "object",
+        "required": ["type", "id", "attributes"],
+        "properties": {
+          "type": { "type": "string", "enum": ["purchases"] },
+          "id": { "type": "string" },
+          "attributes": { "$ref": "#/components/schemas/PurchaseAttributes" },
+          "links": { "$ref": "#/components/schemas/ResourceLinks" }
+        }
+      },
+      "ResourceLinks": {
+        "type": "object",
+        "properties": { "self": { "type": "string" } }
+      },
+      "ToOneLinkage": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": { "type": { "type": "string" }, "id": { "type": "string" } }
+          }
+        }
+      },
+      "ToManyLinkage": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": { "type": { "type": "string" }, "id": { "type": "string" } }
+            }
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "links": { "$ref": "#/components/schemas/Links" },
+          "meta": {
+            "type": "object",
+            "properties": { "totalItems": { "type": "integer" } }
+          }
+        }
+      },
+      "AuthorList": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Pagination" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/AuthorResource" } },
+              "included": { "type": "array", "items": { "$ref": "#/components/schemas/BookResource" } }
+            }
+          }
+        ]
+      },
+      "AuthorDocument": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/AuthorResource" },
+          "included": { "type": "array", "items": { "$ref": "#/components/schemas/BookResource" } }
+        }
+      },
+      "BookList": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Pagination" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/BookResource" } },
+              "included": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": { "type": "string", "enum": ["authors"] },
+                    "id": { "type": "string" },
+                    "attributes": { "type": "object", "properties": { "name": { "type": "string", "nullable": true } } }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "BookDocument": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/BookResource" },
+          "included": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["authors"] },
+                "id": { "type": "string" },
+                "attributes": { "type": "object", "properties": { "name": { "type": "string", "nullable": true } } }
+              }
+            }
+          }
+        }
+      },
+      "BookPatch": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["type", "id", "attributes"],
+            "properties": {
+              "type": { "type": "string", "enum": ["books"] },
+              "id": { "type": "string" },
+              "attributes": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "minLength": 1 },
+                  "priceCents": { "type": "integer", "minimum": 0 },
+                  "stock": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PurchaseList": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Pagination" },
+          {
+            "type": "object",
+            "properties": {
+              "data": { "type": "array", "items": { "$ref": "#/components/schemas/PurchaseResource" } }
+            }
+          }
+        ]
+      },
+      "PurchaseDocument": {
+        "type": "object",
+        "properties": {
+          "data": { "$ref": "#/components/schemas/PurchaseResource" }
+        }
+      },
+      "PurchaseCreate": {
+        "type": "object",
+        "required": ["data"],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["type", "attributes"],
+            "properties": {
+              "type": { "type": "string", "enum": ["purchases"] },
+              "attributes": {
+                "type": "object",
+                "required": ["lines"],
+                "properties": {
+                  "lines": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": ["bookId", "quantity"],
+                      "properties": {
+                        "bookId": { "type": "integer" },
+                        "quantity": { "type": "integer", "minimum": 1 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,306 @@
+framework_bypassed: false
+== Books: list, pagination
+PASS  books: list is 200
+PASS  books: response is JSON
+PASS  books: total counts published books only (14)
+PASS  books: page 1, 20 per page by default
+PASS  books: id order by default, unpublished absent
+PASS  books: item shape (id, title, priceCents, publishedAt, stock, author {id, name})
+PASS  books: anonymous author name is null
+PASS  books: page 2 at 10 per page
+PASS  books: page past the last is 200
+PASS  books: page past the last has empty items
+PASS  books: itemsPerPage=5 page 3
+PASS  books: itemsPerPage=1 last page
+PASS  books: itemsPerPage=50 is allowed
+PASS  books: itemsPerPage=0 is 400 {error}
+PASS  books: itemsPerPage=51 is 400 {error}
+PASS  books: itemsPerPage=abc is 400 {error}
+PASS  books: itemsPerPage=-1 is 400 {error}
+PASS  books: itemsPerPage=2.5 is 400 {error}
+PASS  books: page=abc is 400 {error}
+PASS  books: unknown query parameters are ignored
+== Books: filters
+PASS  filter title: contains, case-insensitive
+PASS  filter title: upper case query
+PASS  filter title: apostrophe
+PASS  filter title: % is a literal character
+PASS  filter title: _ is a literal character
+PASS  filter author: exact name
+PASS  filter author: not a substring match
+PASS  filter priceCents[gte]: 1000 included, 999 excluded
+PASS  filter priceCents[lte]: 2000 included, 2001 excluded
+PASS  filter priceCents range
+PASS  filter publishedAt[after]: bound included
+PASS  filter publishedAt[before]: bound included
+PASS  filter publishedAt range
+PASS  filter inStock=true: stock > 0
+PASS  filter inStock=false: stock 0
+PASS  filters combined with sorting
+PASS  filters combined with pagination
+PASS  filter priceCents[gte]=abc is 400 {error}
+PASS  filter priceCents[lte]= is 400 {error}
+PASS  filter publishedAt[after]=2020-13-01 is 400 {error}
+PASS  filter publishedAt[before]=yesterday is 400 {error}
+PASS  filter publishedAt[after]=2020-02-30 is 400 {error}
+PASS  filter inStock=yes is 400 {error}
+== Books: sorting
+PASS  order priceCents asc, ties by id
+PASS  order priceCents asc, page 2
+PASS  order priceCents desc, ties by id ascending
+PASS  order title asc, ties by id
+PASS  order title desc, page 2
+PASS  order publishedAt asc
+PASS  order publishedAt desc, ties by id
+PASS  order: several keys in the order given
+PASS  order: keys reversed give another order
+PASS  order[stock]=asc is 400 {error}
+PASS  order[title]=up is 400 {error}
+PASS  order[priceCents]= is 400 {error}
+PASS  order[id]=sideways is 400 {error}
+== Books: items
+PASS  book 4: 200
+PASS  book 4: shape
+PASS  book 10: anonymous author
+PASS  unpublished book is 404 {error}
+PASS  unknown book is 404 {error}
+PASS  malformed book id is 404
+== Authors
+PASS  authors: list
+PASS  authors: publishedBooks counts published books only
+PASS  authors: anonymous author has a null name
+PASS  authors: paginated
+PASS  author 1: published books in id order
+PASS  author 4: anonymous, unpublished book hidden
+PASS  author 5: no published book
+PASS  unknown author is 404 {error}
+PASS  malformed author id is 404
+== Purchases: identification
+PASS  GET /purchases with no header is 401 {error}
+PASS  GET /purchases/1 with no header is 401
+PASS  GET /purchases/abc with no header is 401 (checked first)
+PASS  POST /purchases (invalid body) with no header is 401 (checked first)
+PASS  GET /purchases with Customer-Id: abc is 401 {error}
+PASS  GET /purchases/1 with Customer-Id: abc is 401
+PASS  GET /purchases/abc with Customer-Id: abc is 401 (checked first)
+PASS  POST /purchases (invalid body) with Customer-Id: abc is 401 (checked first)
+PASS  GET /purchases with Customer-Id: 99 is 401 {error}
+PASS  GET /purchases/1 with Customer-Id: 99 is 401
+PASS  GET /purchases/abc with Customer-Id: 99 is 401 (checked first)
+PASS  POST /purchases (invalid body) with Customer-Id: 99 is 401 (checked first)
+PASS  GET /purchases with Customer-Id: 1.5 is 401 {error}
+PASS  GET /purchases/1 with Customer-Id: 1.5 is 401
+PASS  GET /purchases/abc with Customer-Id: 1.5 is 401 (checked first)
+PASS  POST /purchases (invalid body) with Customer-Id: 1.5 is 401 (checked first)
+== Purchases: reads
+PASS  customer 1: own purchases, most recent first
+PASS  customer 1: total, page, itemsPerPage
+PASS  purchase shape: createdAt (UTC ISO 8601), totalCents, lines
+PASS  purchase timestamps parse
+PASS  customer 1: paginated
+PASS  customer without purchases: empty list
+PASS  purchase 1: lines with stored unit prices
+PASS  purchase 5: unit price as stored, not current
+PASS  another customer's purchase is 404 {error}
+PASS  the owner sees it
+PASS  unknown purchase is 404
+PASS  malformed purchase id is 404
+== Sales report
+PASS  report January: 200
+PASS  report: served as CSV
+PASS  report January: content
+PASS  report February: groups by book, not title
+PASS  report: last second of a day included
+PASS  report: first second of a day included
+PASS  report: empty period is 200
+PASS  report: empty period is the header only
+PASS  report ? is 400 {error}
+PASS  report ?from=2026-01-01 is 400 {error}
+PASS  report ?to=2026-01-31 is 400 {error}
+PASS  report ?from=2026-13-01&to=2026-12-31 is 400 {error}
+PASS  report ?from=2026-01-01&to=soon is 400 {error}
+PASS  report ?from=2026-02-30&to=2026-03-01 is 400 {error}
+PASS  report ?from=2026-02-01&to=2026-01-31 is 400 {error}
+== Change 1: Customer-Id header, X-Customer-Id refused
+PASS  GET /purchases with only X-Customer-Id is 401 {error}
+PASS  GET /purchases/1 with only X-Customer-Id is 401 {error}
+PASS  GET /purchases/abc with only X-Customer-Id is 401 {error}
+PASS  POST /purchases with only X-Customer-Id is 401 (checked first)
+PASS  POST /purchases/1/refund with only X-Customer-Id is 401
+PASS  X-Customer-Id of another customer is 401 too
+PASS  with both headers, only Customer-Id counts
+PASS  with both headers, X-Customer-Id does not grant access (404)
+== Change 2: pages in every list
+PASS  books: pages is 1 for 14 items at 20 per page
+PASS  books: envelope keeps items, total, page, itemsPerPage
+PASS  books: 14 items at 10 per page is 2 pages
+PASS  books: 14 items at 5 per page is 3 pages (rounded up)
+PASS  books: 14 items at 14 per page is 1 page (exact)
+PASS  books: 14 items at 1 per page is 14 pages
+PASS  books: pages unchanged past the last page
+PASS  books: pages follows the filtered total (5 at 2 per page is 3)
+PASS  books: no item is 0 pages
+PASS  books: pages at 50 per page
+PASS  authors: pages is 1 (5 items, 10 per page)
+PASS  authors: 5 items at 2 per page is 3 pages
+PASS  authors: last page still says 3 pages
+PASS  purchases: pages is 1 (4 purchases)
+PASS  purchases: 4 purchases at 3 per page is 2 pages
+PASS  purchases: empty list is 0 pages
+== Change 3: books 20 per page, other lists 10
+PASS  books: default page size is 20 (all 14 on page 1)
+PASS  books: page 2 at the default size is empty
+PASS  books: the client still asks another size
+PASS  books: itemsPerPage=51 still 400
+PASS  books: itemsPerPage=0 still 400
+PASS  books: sorting at the default size lists all 14
+PASS  authors: default page size stays 10
+PASS  purchases: default page size stays 10
+== Change 4: books?q
+PASS  q matches the author name, case-insensitive
+PASS  q upper case
+PASS  q matches part of the author name
+PASS  q matches another author
+PASS  q matches titles
+PASS  q matches a title, upper case
+PASS  q matches inside a title
+PASS  q matches the author name of several books
+PASS  q matches titles containing the text (not only at the start)
+PASS  q matches a book whose author has no name
+PASS  q without match is an empty list, 0 pages
+PASS  q: % is a literal character
+PASS  q: _ is a literal character
+PASS  q does not reveal an unpublished book (title)
+PASS  q does not reveal an unpublished book (author)
+PASS  q with inStock=true
+PASS  q with inStock=false
+PASS  q with the title filter (both must match)
+PASS  q with the author filter
+PASS  q and author filter that exclude each other
+PASS  q with a price range
+PASS  q with a date range
+PASS  q with sorting
+PASS  q with sorting and pagination
+PASS  q with pagination: last page
+PASS  q with every filter at once
+== Change 5: authors?hasPublishedBooks
+PASS  hasPublishedBooks=true: authors with a published book
+PASS  hasPublishedBooks=true: total, pages
+PASS  hasPublishedBooks=true: items keep publishedBooks
+PASS  hasPublishedBooks=false: authors without a published book
+PASS  hasPublishedBooks=false: total, pages, publishedBooks 0
+PASS  hasPublishedBooks=true with pagination
+PASS  hasPublishedBooks=false: page past the last
+PASS  hasPublishedBooks=maybe is 400 {error}
+PASS  hasPublishedBooks=abc is 400 {error}
+PASS  without the filter, all 5 authors
+== Books: PATCH
+PASS  patch title: 200
+PASS  patch title: book in the list shape, only title changed
+PASS  patch: unknown fields ignored
+PASS  patch: stock 0 allowed
+PASS  patch: several fields, price 0 allowed
+PASS  patch {"priceCents": -1} is 422 {error}
+PASS  patch {"stock": -1} is 422 {error}
+PASS  patch {"stock": 1.5} is 422 {error}
+PASS  patch {"priceCents": "2000"} is 422 {error}
+PASS  patch {"stock": null} is 422 {error}
+PASS  patch {"title": null} is 422 {error}
+PASS  patch {"title": ""} is 422 {error}
+PASS  patch {"title": "Ok", "stock": -5} is 422 {error}
+PASS  patch {"title": 42} is 422 {error}
+PASS  rejected patches changed nothing
+PASS  patch on an unpublished book is 204
+PASS  unpublished book stays hidden
+PASS  patch unknown book is 404
+PASS  patch malformed id is 404
+== Purchases: failures change nothing
+PASS  customer 1 has 4 purchases before
+PASS  purchase {} is 422 {error}
+PASS  purchase {"lines": []} is 422 {error}
+PASS  purchase {"lines": "x"} is 422 {error}
+PASS  purchase {"lines": [{"bookId": 3, "quantity": 1}]} is 422 {error}
+PASS  purchase {"lines": [{"bookId": 999, "quantity": 1}]} is 422 {error}
+PASS  purchase {"lines": [{"bookId": 1, "quantity": 0}]} is 422 {error}
+PASS  purchase {"lines": [{"bookId": 1, "quantity": 1.5}]} is 422 {error}
+PASS  purchase {"lines": [{"bookId": 1, "quantity": "2"}]} is 422 {error}
+PASS  purchase {"lines": [{"bookId": 1}]} is 422 {error}
+PASS  purchase {"lines": [{"quantity": 1}]} is 422 {error}
+PASS  purchase {"lines": [{"bookId": 1, "quantity": 1}, {"bookId": 8, "quantity": 1}]} is 422 {error}
+PASS  purchase of a book out of stock is 409 {error}
+PASS  stock is checked on the total quantity across lines (409)
+PASS  one line over stock fails the whole purchase (409)
+PASS  declined payment is 402 {error}
+PASS  declined: the payment service was asked for 15 x 3500
+PASS  failing payment service (500) is 502 {error}
+PASS  failing: the payment service was called for customer 3
+PASS  unreachable payment service is 502 {error}
+PASS  failed purchases stored nothing (customer 1)
+PASS  failed purchases stored nothing (customer 3)
+PASS  failed purchases changed no stock
+PASS  failed purchases sold nothing today
+== Purchases: success
+PASS  purchase: 201
+PASS  purchase: shape, total is the sum of the lines at current prices
+PASS  purchase: createdAt is now
+PASS  purchase: refundedAt is present and null in the creation answer
+PASS  purchase: one accepted payment of 4800 for customer 1
+PASS  purchase: stock of book 1 decreased by 3
+PASS  purchase: stock of book 7 decreased by 1
+PASS  purchase: listed first for its customer
+PASS  purchase: readable by its customer, same shape
+PASS  purchase: 404 for another customer
+PASS  report: today's sale, all customers
+PASS  purchase after a price change: 201
+PASS  purchase after a price change: current price is used
+PASS  purchase after a price change: payment of 2100
+PASS  stock left exactly: last copies can be bought
+PASS  then the book is out of stock (409)
+== Change 6 and 7: refunds, report
+PASS  every purchase of a list has refundedAt, null while not refunded
+PASS  a single purchase has refundedAt null while not refunded
+PASS  customer 2's purchases have refundedAt null
+PASS  refund with no header is 401 {error}
+PASS  refund with Customer-Id: abc is 401 {error}
+PASS  refund with Customer-Id: 99 is 401 {error}
+PASS  refund with X-Customer-Id: 1 is 401 {error}
+PASS  refused refunds (401) changed nothing
+PASS  refused refunds (401) changed no stock
+PASS  refund of another customer's purchase is 404 {error}
+PASS  refund by a customer without purchases is 404
+PASS  refund of an unknown purchase is 404 {error}
+PASS  refund of a malformed purchase id is 404
+PASS  refused refunds (404) left the purchase not refunded
+PASS  refused refunds (404) changed no stock
+PASS  refund of own purchase 1: 200
+PASS  refund answer: the purchase with refundedAt set (UTC ISO 8601, now)
+PASS  refund answer: the purchase shape is kept
+PASS  refund: stock of book 4 restored by the quantity (2)
+PASS  refund: stock of book 7 restored by the quantity (1)
+PASS  refund: the stock of other books is untouched
+PASS  refund: the purchase reads back with the same refundedAt
+PASS  refund: the purchase stays listed, only it has a refundedAt
+PASS  refund: other customers' purchases are untouched (refundedAt null)
+PASS  refund: another purchase of the same customer is untouched
+PASS  second refund of the same purchase is 409 {error}
+PASS  second refund changed no stock
+PASS  second refund kept the first refundedAt
+PASS  third refund is still 409
+PASS  another customer refunding an already refunded purchase is 404, not 409
+PASS  refund of a purchase with two lines on the same book: 200
+PASS  refund: the stock of a book bought on two lines is restored by the sum (3)
+PASS  refund: the other book of that purchase is restored (1)
+PASS  refund of purchase 6: 200
+PASS  refund: a book out of stock gets exactly the quantity back (0 to 1)
+PASS  refund of a purchase of the customer whose payments fail: 200
+PASS  refund: stock of book 10 restored
+PASS  refunds never called the payment service
+PASS  report: a refunded purchase of today is excluded
+PASS  report January: purchase 1 refunded and excluded, the others stay
+PASS  report: a day whose only purchase is refunded is the header only
+PASS  report February: refunded purchase 8 excluded, the others stay
+
+regression: 172/172
+change: 111/111
+score: 283 passed, 0 failed
+languages: json-definition=5 typescript=11

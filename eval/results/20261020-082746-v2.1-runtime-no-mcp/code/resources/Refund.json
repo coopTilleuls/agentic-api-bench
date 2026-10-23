@@ -1,0 +1,24 @@
+{
+  "name": "Refund",
+  "description": "Refunds one of the customer's purchases.",
+  "query": "purchase.query.ts",
+  "command": "refund.command.ts",
+  "parameters": {
+    "Customer-Id": {"in": "header", "type": "integer", "required": true, "status": 401, "handler": "customer.handler.ts"}
+  },
+  "properties": {
+    "id": {"type": "integer", "identifier": true, "readOnly": true},
+    "createdAt": {"type": "datetime"},
+    "totalCents": {"type": "integer"},
+    "refundedAt": {"type": "datetime"},
+    "lines": {"type": "array", "items": {"type": "object", "properties": {
+      "bookId": {"type": "integer"},
+      "title": {"type": "string"},
+      "quantity": {"type": "integer"},
+      "unitPriceCents": {"type": "integer"}
+    }}}
+  },
+  "operations": [
+    {"method": "POST", "path": "/purchases/{id}/refund", "input": {}}
+  ]
+}

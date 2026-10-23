@@ -1,0 +1,11 @@
+^api\.anthropic\.com$
+^claude\.ai$
+^platform\.claude\.com$
+^repo\.packagist\.org$
+^packagist\.org$
+^api\.github\.com$
+^codeload\.github\.com$
+^objects\.githubusercontent\.com$
+^raw\.githubusercontent\.com$
+^getcomposer\.org$
+^flex\.symfony\.com$

@@ -1,0 +1,21 @@
+{
+  "name": "Author",
+  "query": "author.query.ts",
+  "itemsPerPage": 10,
+  "parameters": {
+    "itemsPerPage": {"in": "query", "type": "integer", "min": 1, "max": 50, "pagination": "itemsPerPage"}
+  },
+  "properties": {
+    "id": {"type": "integer", "identifier": true},
+    "name": {"type": "string"},
+    "publishedBooks": {"type": "integer", "computed": true},
+    "books": {"type": "array", "items": {"type": "object", "properties": {
+      "id": {"type": "integer"},
+      "title": {"type": "string"}
+    }}}
+  },
+  "operations": [
+    {"method": "GET", "path": "/authors", "output": ["id", "name", "publishedBooks"]},
+    {"method": "GET", "path": "/authors/{id}", "output": ["id", "name", "books"]}
+  ]
+}

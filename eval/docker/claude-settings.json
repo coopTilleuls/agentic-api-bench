@@ -1,0 +1,9 @@
+{
+  "disableBundledSkills": true,
+  "skillOverrides": {"doctor": "off"},
+  "enabledPlugins": {
+    "cc-plugin-sec-default@builtin": false,
+    "cc-plugin-agents-md@builtin": false,
+    "cc-plugin-plugin-authoring@builtin": false
+  }
+}

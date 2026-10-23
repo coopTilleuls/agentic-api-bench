@@ -1,0 +1,30 @@
+# Dedicated operations
+
+`operations` **replaces** the default CRUD endpoints (`path`, identifier optional) and restricts methods (others `405`); `properties` still describes rows:
+
+```json
+"operations": [
+  {"method": "GET", "path": "/authors", "output": ["id", "name", "publishedBooks"]},
+  {"method": "GET", "path": "/authors/{id}", "output": ["id", "name", "books"]}
+]
+```
+
+A path with `{<identifier>}` once, last or before literal segments, is an **item operation**. `GET` reads one (`404` if absent/malformed); `PUT`/`PATCH`/`DELETE` follow the write lifecycle (`commands`). `POST` on an item is an action: lookup first (`404`), then `create` runs with `ctx.id`, then read-back (`200`, or `204` if hidden). `properties` must declare every output.
+
+Action: `POST /purchases/{id}/refund` with `"input": {}` and `"command": "refund.command.ts"`. Report: `GET /business/export`, `"format": "csv"`, a `query`.
+
+Operation keys:
+
+- `method` (yes) — `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, or a non-empty array of distinct ones (below).
+- `path` (yes) — full lowercase path, one optional `/{<identifier>}`; unique with its method across definitions.
+- `format` — `jsonld`, `json`, `csv`, **pinned**: `Accept`, `?format`, suffixes ignored.
+- `output` — output properties in order, when they differ. `order` — default order.
+- `parameters` — added to or overriding the definition's.
+- `query` — for `GET`, unless the definition has `query` or `table`.
+- `command` — for other methods unless the definition has one: `create` (`POST`), `update` (`PUT`/`PATCH`), `remove` (`DELETE`).
+- `input` — body, same syntax as the definition's; `{}` means no body (never read, cannot fail); absent: the definition's `input`, else non-`readOnly` properties.
+- `description` — OpenAPI{{if .MCP}}, MCP{{end}}.
+
+A `GET` without placeholder behaves like a collection (parameters, `?page=N`); CSV returns **every row** unless `?page` is given, streamed (`ctx.reject` and SQL errors keep their status). No identifier means no added ordering (see `queries`). A write operation answers the row its command returns (`201` `POST`, `200` otherwise) or `204`. Raw responses (HTML, redirect): `ctx.response` (`scripts`).
+
+When two methods must behave the same, declare one operation with `method: [..]` instead of two operations: `{"method": ["GET", "POST"], "path": "/api/verify/{token}", "query": "verify.query.ts"}`. It needs its own `query` (read, body ignored) or `command` (write, never `GET`), run for every method; `ctx.request.method` tells which. OpenAPI and `Allow` list each method{{if .MCP}}, MCP tools{{end}}.

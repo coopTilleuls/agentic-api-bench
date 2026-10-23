@@ -1,0 +1,2 @@
+init event clean: {"model":"claude-sonnet-5-5","cwd":"/work","plugins":["cc-plugin-sec-default@builtin"],"memory_paths":{"auto":"/home/agent/.claude/projects/-work/memory/"},"mcp_servers":[{"name":"caddy-resource","status":"connected","source":"dynamic"}],"skills":[],"claude_code_version":"2.1.296"}
+result: success, turns 9, cost $0.17271229999999999

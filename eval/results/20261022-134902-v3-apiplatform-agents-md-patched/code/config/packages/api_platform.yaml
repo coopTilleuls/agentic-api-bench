@@ -1,0 +1,9 @@
+api_platform:
+    title: Bookshop API
+    version: 1.0.0
+    defaults:
+        stateless: true
+    formats:
+        jsonapi: ['application/vnd.api+json']
+    jsonapi:
+        strict_member_names: true

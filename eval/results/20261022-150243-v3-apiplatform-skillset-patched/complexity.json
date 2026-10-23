@@ -1,0 +1,81 @@
+{
+  "imperative_files": 24,
+  "parse_failures": [],
+  "cc_total": 186,
+  "cc_max_file": 31,
+  "mi_avg": 77.49,
+  "mi_files": 20,
+  "lloc": 362,
+  "functions": 73,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 7,
+  "config_leaves": 6,
+  "config_files": 4,
+  "config_failures": [],
+  "sql_statements": 19,
+  "sql_joins": 3,
+  "sql_subqueries": 4,
+  "sql_where_predicates": 27,
+  "sql_tokens": 611,
+  "qb_calls": 0,
+  "sql_files": [
+    {
+      "file": "src/Bookshop/PurchaseLines.php",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/AuthorGetController.php",
+      "statements": 2,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/AuthorListController.php",
+      "statements": 2,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/BookGetController.php",
+      "statements": 2,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/BookListController.php",
+      "statements": 2,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/BookPatchController.php",
+      "statements": 2,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/PurchaseCreateController.php",
+      "statements": 3,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/PurchaseGetController.php",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/PurchaseListController.php",
+      "statements": 2,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/SalesReportController.php",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/EventListener/CustomerIdentificationListener.php",
+      "statements": 1,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "apiplatform",
+  "ast_metrics": "0.43.1"
+}

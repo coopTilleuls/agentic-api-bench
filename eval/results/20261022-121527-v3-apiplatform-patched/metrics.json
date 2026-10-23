@@ -1,0 +1,75 @@
+{
+  "task": "build",
+  "num_turns": 47,
+  "total_cost_usd": 0.53904109,
+  "usage": {
+    "input_tokens": 94,
+    "output_tokens": 111828,
+    "cache_read_input_tokens": 5669789,
+    "cache_creation_input_tokens": 146133
+  },
+  "wall_seconds": 772,
+  "project_root": ".",
+  "authored_loc": 1574,
+  "authored_files": 15,
+  "scaffold_files_modified": 3,
+  "scaffold_command": null,
+  "tool_written_loc": 1546,
+  "repo_loc": 3708,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 11,
+    "parse_failures": [],
+    "cc_total": 200,
+    "cc_max_file": 77,
+    "mi_avg": 75.97,
+    "mi_files": 11,
+    "lloc": 394,
+    "functions": 60,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 4,
+    "config_leaves": 4,
+    "config_files": 2,
+    "config_failures": [],
+    "sql_statements": 11,
+    "sql_joins": 3,
+    "sql_subqueries": 0,
+    "sql_where_predicates": 12,
+    "sql_tokens": 307,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "src/Controller/AuthorController.php",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Controller/BookController.php",
+        "statements": 2,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Controller/PurchaseController.php",
+        "statements": 6,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Controller/ReportController.php",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/JsonApi/JsonApi.php",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "apiplatform",
+    "ast_metrics": "0.43.1"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "imperative_files": 31,
+  "parse_failures": [],
+  "cc_total": 233,
+  "cc_max_file": 29,
+  "mi_avg": 83.11,
+  "mi_files": 27,
+  "lloc": 398,
+  "functions": 98,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 7,
+  "config_leaves": 7,
+  "config_files": 4,
+  "config_failures": [],
+  "sql_statements": 18,
+  "sql_joins": 5,
+  "sql_subqueries": 2,
+  "sql_where_predicates": 21,
+  "sql_tokens": 503,
+  "qb_calls": 0,
+  "sql_files": [
+    {
+      "file": "src/Catalog/AuthorRepository.php",
+      "statements": 5,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Catalog/BookRepository.php",
+      "statements": 3,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Controller/Report/SalesReportController.php",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Sales/CustomerAuthenticator.php",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Sales/PurchaseRepository.php",
+      "statements": 4,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Sales/PurchaseService.php",
+      "statements": 4,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "apiplatform",
+  "ast_metrics": "0.43.1"
+}

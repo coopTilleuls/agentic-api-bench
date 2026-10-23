@@ -1,0 +1,33 @@
+{
+  "imperative_files": 1,
+  "parse_failures": [],
+  "cc_total": 162,
+  "cc_max_file": 162,
+  "mi_avg": 16.03,
+  "mi_files": 1,
+  "lloc": 200,
+  "functions": 30,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [
+    "src/main.rs"
+  ],
+  "config_keys": 0,
+  "config_leaves": 0,
+  "config_files": 0,
+  "config_failures": [],
+  "sql_statements": 18,
+  "sql_joins": 5,
+  "sql_subqueries": 1,
+  "sql_where_predicates": 18,
+  "sql_tokens": 457,
+  "qb_calls": 0,
+  "sql_files": [
+    {
+      "file": "src/main.rs",
+      "statements": 18,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "rust",
+  "ast_metrics": "0.43.1"
+}

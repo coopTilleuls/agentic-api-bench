@@ -1,0 +1,51 @@
+# Scripts: `ctx` API, stdlib, Starlark
+
+Query, command and handler scripts: TypeScript (`.ts`) or Starlark (`.star`/`.py`), same `ctx` API. No imports (`import { defineResource } from "caddy-resource"` is never needed), Node.js API or timers; types are stripped unchecked (`QueryContext`, `Sql` need no import); 10 s per call.
+
+## ctx
+
+- ``ctx.sql`...` `` — `Sql`; each `${value}` is a bind parameter: scalar, `null`/`undefined`, array of one scalar type (`= ANY(${ids})`), or another `ctx.sql` fragment. Names cannot be interpolated: `ctx.resource()` (`queries`).
+- `ctx.db.query(sql)` — `Row[]`, synchronous, in the command's transaction (`RETURNING` gives values). `ctx.db.exec(sql)` — `{ rowCount }`. A plain string is an error.
+- `ctx.fetch(url, { method, headers, body })` — `{ status, ok, headers, text(), json() }`; host in `allow.fetch` (`fetch_denied`); `body` string or object (sent as JSON); non-2xx does not throw; 5 s timeout.
+- `ctx.env(name)` — name in `allow.env` (`env_denied`); `""` when unset.
+- `ctx.reject({ message, pointer?, hint?, code?, status? })` — never returns (`commands`).
+- `ctx.get(name)` / `ctx.set(name, value)` — per-request values (parsed parameters, what handlers set); `null` if unset.
+- `ctx.resource(name)` — SQL helpers (`queries`). `ctx.property(name)` — handlers only: `r."priceCents"`, `author.name` gives `r."author_name"`.
+- `ctx.phase` — `"read"`, `"lookup"`, `"write"`. `ctx.validating` — `true` during validation. `ctx.operation` — `"collection"`, `"item"`, `"create"`, `"update"`, `"delete"`. `ctx.id` — item identifier or `null`. `ctx.page`, `ctx.itemsPerPage`, `ctx.filters` — row-returning queries (`queries`).
+- `ctx.request.method`, `ctx.request.path` — `"GET"`, `"/books/7"`. `ctx.request.query(name)` — first value or `null`. `ctx.request.header(name)` — case-insensitive, or `null`.
+- `ctx.request.body` — raw body string (also available with `input: {}`). `ctx.request.json()` — body parsed as JSON (`invalid_body` if not).
+- `ctx.request.accept` — `Accept` (`""` if absent); `ctx.request.accepts(type)` — admits a media type (wildcards, `q=0` honored).
+- `ctx.crypto`, `ctx.time` — below. `ctx.response(...)` — raw response, operations only.
+
+## ctx.crypto and ctx.time
+
+UTF-8 strings (decoders refuse other bytes). Starlark: `snake_case` (`random_hex`) or camelCase. Try with `caddy resource eval`.
+
+- `ctx.crypto.sha256(s)`, `sha512(s)`, `sha1(s)` — hex digest; `hmac(algo, key, data)` — hex.
+- `ctx.crypto.equal(a, b)` — constant-time compare: signatures and tokens, never `==`.
+- `ctx.crypto.randomHex(nBytes)` — CSPRNG hex, 1..1024 bytes. `ctx.crypto.uuid()` — v4.
+- `ctx.crypto.base64Encode(s)` / `base64Decode(s)` (reads URL-safe, unpadded too), `hexEncode(s)` / `hexDecode(s)`.
+- `ctx.time.now()` — ISO 8601 UTC with ms. `unix()` — epoch seconds. `parse(iso)` — epoch seconds of a date, datetime, offset, fractions, zoneless (UTC). `format(seconds)` — ISO 8601 UTC.
+
+Bad input: `invalid_crypto_call` (unknown algorithm, malformed hex/base64, size out of range, non-UTF-8, non-string), `invalid_time_value`.
+
+## Raw responses
+
+`ctx.response({status, headers, body})` answers HTML, a redirect or a custom format: `status` 100-599 (default 200), `headers` name to string, `body` a **string**; nothing wrapped or negotiated, `Content-Type` only if set (default `text/plain; charset=utf-8`).
+
+Only in **dedicated operations** (`operations`): a `GET` operation's `query` (`"read"`), the `command` of a `POST`/`PUT`/`PATCH`/`DELETE` operation, with or without `/{id}` (commits first; on `/{id}` after the `404` lookup). Elsewhere `response_not_allowed`; bad argument `invalid_response`. `Accept` does not stop a `GET` operation script (rows then give `406`): use `ctx.request.accepts`. Prefer it to Caddy `templates`, `file_server`, `handle_errors` (stale `Content-Length`).
+
+`ctx.response({ headers: { "Content-Type": "text/html; charset=utf-8" }, body: "<h1>Welcome</h1>" })`
+
+## Starlark
+
+Python without `import`, classes, `try`/`except`/`raise`, f-strings, `with`, `async`, `is` (each reported with the alternative); `%`/`.format()`, `None` with `==`; `ctx` is snake_case, synchronous:
+
+- `export default function query(ctx)` — `def query(ctx):`; `def handler(value, ctx):`; `def create/update/remove(input, ctx):` (`def delete` works).
+- ``ctx.sql`... ${a}` `` — `ctx.sql("... {a}", a = x)` (`{{"{{"}}` `{{"}}"}}` literal braces) or `ctx.sql("... $1", x)`.
+- `ctx.db.exec(sql).rowCount` — `.row_count`; `ctx.itemsPerPage` — `ctx.items_per_page`.
+- `await ctx.fetch(url, {method, body})` — `ctx.fetch(url, method = "POST", headers = {...}, body = {...})`.
+- `JSON.parse(s)` / `JSON.stringify(v)` — `ctx.json.decode(s)` / `ctx.json.encode(v)`.
+- `ctx.reject({message, status})` — `ctx.reject("message", pointer = "/f", hint = "...", code = "...", status = 409)`.
+- `{items, totalItems}` — `{"items": [...], "total_items": n}`; `ctx.response(status = 302, headers = {"Location": "/"}, body = "")`.
+

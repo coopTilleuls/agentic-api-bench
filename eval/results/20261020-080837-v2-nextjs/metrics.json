@@ -1,0 +1,100 @@
+{
+  "task": "build",
+  "num_turns": 33,
+  "total_cost_usd": 0.045175410000000006,
+  "usage": {
+    "input_tokens": 62,
+    "output_tokens": 38275,
+    "cache_read_input_tokens": 1590151,
+    "cache_creation_input_tokens": 50651
+  },
+  "wall_seconds": 737,
+  "project_root": ".",
+  "authored_loc": 746,
+  "authored_files": 17,
+  "scaffold_files_modified": 3,
+  "scaffold_command": null,
+  "tool_written_loc": 0,
+  "repo_loc": 779,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 13,
+    "parse_failures": [],
+    "cc_total": 155,
+    "cc_max_file": 32,
+    "mi_avg": 59.69,
+    "mi_files": 11,
+    "lloc": 243,
+    "functions": 59,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 9,
+    "config_leaves": 21,
+    "config_files": 2,
+    "config_failures": [],
+    "sql_statements": 18,
+    "sql_joins": 6,
+    "sql_subqueries": 0,
+    "sql_where_predicates": 17,
+    "sql_tokens": 541,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "app/authors/[id]/route.ts",
+        "statements": 2,
+        "qb_calls": 0
+      },
+      {
+        "file": "app/authors/route.ts",
+        "statements": 2,
+        "qb_calls": 0
+      },
+      {
+        "file": "app/books/[id]/route.ts",
+        "statements": 2,
+        "qb_calls": 0
+      },
+      {
+        "file": "app/books/route.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "app/purchases/[id]/route.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "app/purchases/route.ts",
+        "statements": 6,
+        "qb_calls": 0
+      },
+      {
+        "file": "app/reports/sales/route.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "lib/auth.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "lib/books.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "lib/purchases.ts",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "nextjs",
+    "ast_metrics": "0.43.1"
+  }
+}

@@ -1,0 +1,37 @@
+$ npx --yes @nestjs/cli new app --directory . --package-manager npm --skip-git
+✨  We will scaffold your app in a few seconds..
+
+CREATE .gitattributes (19 bytes)
+CREATE .oxlintrc.json (206 bytes)
+CREATE .prettierrc (52 bytes)
+CREATE README.md (7475 bytes)
+CREATE nest-cli.json (171 bytes)
+CREATE package.json (1407 bytes)
+CREATE tsconfig.build.json (170 bytes)
+CREATE tsconfig.json (601 bytes)
+CREATE vitest.config.e2e.ts (202 bytes)
+CREATE vitest.config.ts (349 bytes)
+CREATE src/app.controller.ts (277 bytes)
+CREATE src/app.module.ts (255 bytes)
+CREATE src/app.service.ts (142 bytes)
+CREATE src/main.ts (237 bytes)
+CREATE src/app.controller.spec.ts (623 bytes)
+CREATE test/app.e2e-spec.ts (731 bytes)
+
+- Installation in progress... ☕
+✔ Installation in progress... ☕
+
+🚀  Successfully created a new project
+👉  Get started with the following commands:
+
+$ cd .
+$ npm run start
+
+                                         
+                          Thanks for installing Nest 🙏
+                 Please consider donating to our open collective
+                        to help us maintain this package.
+                                         
+                                         
+                   🍷  Donate: https://opencollective.com/nest
+                                         

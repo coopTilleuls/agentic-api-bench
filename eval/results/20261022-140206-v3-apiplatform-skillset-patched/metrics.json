@@ -1,0 +1,70 @@
+{
+  "task": "build",
+  "num_turns": 93,
+  "total_cost_usd": 1.2991781699999996,
+  "usage": {
+    "input_tokens": 182,
+    "output_tokens": 190331,
+    "cache_read_input_tokens": 15742227,
+    "cache_creation_input_tokens": 248406
+  },
+  "wall_seconds": 1021,
+  "project_root": ".",
+  "authored_loc": 2124,
+  "authored_files": 29,
+  "scaffold_files_modified": 3,
+  "scaffold_command": null,
+  "tool_written_loc": 599,
+  "repo_loc": 4306,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 23,
+    "parse_failures": [],
+    "cc_total": 246,
+    "cc_max_file": 46,
+    "mi_avg": 84.86,
+    "mi_files": 19,
+    "lloc": 415,
+    "functions": 90,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 20,
+    "config_leaves": 14,
+    "config_files": 4,
+    "config_failures": [],
+    "sql_statements": 16,
+    "sql_joins": 3,
+    "sql_subqueries": 0,
+    "sql_where_predicates": 13,
+    "sql_tokens": 436,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "src/Repository/AuthorRepository.php",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Repository/BookRepository.php",
+        "statements": 7,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Repository/PurchaseRepository.php",
+        "statements": 7,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Repository/SalesReportRepository.php",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "apiplatform",
+    "ast_metrics": "0.43.1"
+  }
+}

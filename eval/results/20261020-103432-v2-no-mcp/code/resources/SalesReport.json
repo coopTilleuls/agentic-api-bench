@@ -1,0 +1,16 @@
+{
+  "name": "SalesReport",
+  "query": "sales.query.ts",
+  "parameters": {
+    "from": {"in": "query", "type": "date", "required": true},
+    "to": {"in": "query", "type": "date", "required": true}
+  },
+  "operations": [
+    {"method": "GET", "path": "/reports/sales", "format": "csv"}
+  ],
+  "properties": {
+    "title": {"type": "string"},
+    "quantity": {"type": "integer"},
+    "revenueCents": {"type": "integer"}
+  }
+}

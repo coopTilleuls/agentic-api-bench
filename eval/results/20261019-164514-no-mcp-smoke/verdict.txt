@@ -1,0 +1,2 @@
+REJECTED:
+plugins loaded: cc-plugin-sec-default, cc-plugin-agents-md, cc-plugin-plugin-authoring

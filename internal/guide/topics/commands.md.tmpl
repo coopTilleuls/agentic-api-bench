@@ -1,0 +1,49 @@
+# Commands: CLI tools and writes
+
+## CLI
+
+`introspect`, `sql`, `request`, `validate` take `--dsn DSN` (default `$DATABASE_URL`); `request` and `validate` also `--dir resources`. `introspect`, `sql`, `request` read the `resource` block of `--config Caddyfile` (default `./Caddyfile` if present); flags win over it. `eval` and `guide` have no database flags.
+
+- `caddy resource introspect [--rows N] [--table NAME] [--json]` — per table one line per column (type, `not null`, `pk`, default, `-> table.column`), then the first N rows (default 3) by primary key. Read it before writing definitions.
+- `caddy resource sql "<query>" [--arg v]... [--commit] [--json]` — one statement, `$1..$n` from repeated `--arg`; rolled back unless `--commit`.
+- `caddy resource request METHOD PATH [-H 'Name: value']... [-d BODY|@file] [--commit]` — real handler in-process, no server, one transaction rolled back unless `--commit`. Prints `HTTP/1.1 <status>`, headers, body. Exit 0 whatever the status, 1 if the definitions have errors (printed like `validate`). `request POST /books -d '{"title":"Dune"}'`.
+- `caddy resource eval [--lang ts|starlark] [--env NAME=value]... 'EXPR'` — expression offline with `ctx.crypto`, `ctx.time`, `ctx.env`, printed as JSON: `eval 'ctx.crypto.sha256("a")'`.
+- `caddy resource validate` — print the report (`errors`); only static checks without a dsn; exit 1 on errors.
+- `caddy resource init [--dir .] [--dsn DSN] [--listen :8080]` — write `Caddyfile` and `resources/` with a working example; never overwrites.
+- `caddy resource guide [topic]` — the core guide or one topic.
+{{- if .MCP}}
+- `caddy resource mcp [--dir D] [--dsn DSN] [--http ADDR]` — MCP tools over stdio, or `http://ADDR/mcp`, no `Caddyfile` (`mcp`).
+{{- end}}
+
+## Writes
+
+Without `command`, a `table` resource generates `INSERT INTO <table> (<body keys>) VALUES (...) RETURNING <identifier>`, `UPDATE <table> SET <body keys> WHERE <identifier> = <id>`, `DELETE FROM <table> WHERE <identifier> = <id>`. A `query` resource without `command` is read-only. A command module exports a function per method (missing: `405 operation_not_supported`; `405 read_only_resource` when `readOnly` or a `query` has no command):
+
+- `create(input, ctx)` — `POST <path>`; validated body; returns **the new identifier** (required).
+- `update(input, ctx)` — `PUT`/`PATCH <path>/<id>`; body (`PATCH`: sent keys); `ctx.id`; returns nothing.
+- `remove(input, ctx)` — `DELETE <path>/<id>`; `{}`; `ctx.id` (`delete` is reserved in JS; Starlark `def delete` works too).
+
+```ts
+export function create(input, ctx) {
+  const [author] = ctx.db.query(ctx.sql`SELECT name FROM author WHERE id = ${input.author_id}`);
+  if (!author) ctx.reject({ message: `author ${input.author_id} does not exist`, pointer: "/author_id" });
+  const [row] = ctx.db.query(ctx.sql`INSERT INTO book (title, author_id) VALUES (${input.title}, ${input.author_id}) RETURNING id`);
+  return row.id;
+}
+```
+
+## Lifecycle
+
+1. Header parameters are checked (handlers run).
+2. `PUT`/`PATCH`/`DELETE`: the item is looked up through the query with `ctx.phase === "lookup"`; invisible is `404`. `WHERE b.published OR ${ctx.phase === "lookup"}` lets writes reach rows reads hide.
+3. The raw body is `ctx.request.body` (string) and `ctx.request.json()` in every script, even with `"input": {}`. Body validated against `input` (else non-`readOnly` properties) before any code: `unknown_property` (or dropped with `"unknownInput": "ignore"`), `read_only_property`, `invalid_property_value`, `required_property` (`POST`/`PUT`), recursively with pointers (`/lines/0/quantity`). `@id`, `@type`, `@context` are ignored. Values arrive typed (dates `YYYY-MM-DD`, datetimes RFC 3339 strings). JSON only (`application/json`, `application/ld+json`, `application/merge-patch+json`, else `415 unsupported_media_type`; CSV is output only).
+4. Command or generated SQL runs in **one transaction** (`ctx.phase === "write"`); a throw, `ctx.reject` or failed statement rolls back. Constraint errors: `409 conflict`, `422 invalid_reference`, `422 constraint_violation` (with a pointer). Generated writes use each property's `column`.
+5. The row is read back through the query (`"read"`): `POST` `201` + `Location` + item, `PUT`/`PATCH` `200` + item, `DELETE` `204`. If the query hides it: `POST` `201` + `Location` no body, `PUT`/`PATCH` `204`.
+
+## Input keys
+
+Besides `type`, `required`, `description`: `nullable: false` (reject `null`), `min`/`max`, `minLength`/`maxLength`, `minItems`/`maxItems`, `enum`, `properties` (object), `items` (array), `column`:
+
+## ctx.reject
+
+`ctx.reject({ message, pointer, hint, code, status })` stops, rolls back and answers HTTP `status` (default `422`, in a handler the parameter's `status`; any 4xx/5xx, e.g. `402`) with `code` (default `rejected`); `pointer` is a JSON pointer into the body. Failed `ctx.fetch` is `502 fetch_failed`; a plain `throw` is a bug: `500 script_error`. Dedicated operation commands return a row or nothing (`operations`).

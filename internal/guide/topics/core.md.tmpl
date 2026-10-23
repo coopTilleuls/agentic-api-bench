@@ -1,0 +1,76 @@
+# caddy resource: agent guide
+
+Caddy plus a `resource` handler: one definition file per resource (JSON or TypeScript) in a directory becomes a REST endpoint over PostgreSQL: `GET <path>` (paginated), `GET <path>/<id>`, `POST`, `PUT`/`PATCH`/`DELETE <path>/<id>`; JSON-LD/Hydra, JSON or CSV output; `GET /openapi.json`, `GET /` (entrypoint). Nothing to compile. Read a topic (index below) only when you need it.
+
+## Fastest workflow, no server, no probing
+
+- `caddy resource introspect`: tables, columns, sample rows. Start here instead of guessing the schema.
+- `caddy resource sql "<query>"`: run SQL (rolled back unless `--commit`).
+- `caddy resource request METHOD PATH [-H 'Name: value'] [-d BODY]`: run a request in-process, no server (rolled back unless `--commit`).
+- `caddy resource eval 'EXPR'`: evaluate a script expression offline (`ctx.crypto`, `ctx.time`, `ctx.env`).
+- `caddy resource validate`: full report after every edit{{if .MCP}} (also the `validate` MCP tool){{end}}.
+
+Flags `--dir resources --dsn <dsn>` (dsn defaults to `$DATABASE_URL`). Details: topic `commands`.
+
+## Workflow
+
+1. `caddy resource init` scaffolds a working `Caddyfile` and example, or write it (Caddyfile options: topic `server`):
+
+```
+:8080 {
+	resource {
+		dir resources
+		dsn postgres://user:password@localhost:5432/dbname
+{{- if .MCP}}
+		mcp on
+{{- end}}
+	}
+}
+```
+
+2. `caddy run > caddy.log 2>&1 &` once. It reloads `resources/` by itself within a second; restart only after editing the `Caddyfile`.
+3. Write `resources/Book.json` plus the scripts it references; `curl -s localhost:8080/books`.
+4. Errors teach: an invalid definition's paths answer `500` with `code`, `pointer`, `hint` (all errors in `errors`); other paths keep working. Every `hint` ends with `see: caddy resource guide <topic>`.
+
+## Example
+
+`resources/Book.json`: table read and written with generated SQL, declared filters and sorting:
+
+```json
+{
+  "name": "Book",
+  "path": "/books",
+  "table": "book",
+  "itemsPerPage": 10,
+  "properties": {
+    "id": {"type": "integer", "identifier": true, "readOnly": true},
+    "title": {"type": "string", "required": true},
+    "priceCents": {"type": "integer", "column": "price_cents"},
+    "published": {"type": "boolean"}
+  },
+  "parameters": {
+    "title": {"in": "query", "filter": "ipartial"},
+    "priceCents": {"in": "query", "filter": "range"},
+    "order": {"in": "query", "filter": "order", "properties": ["title", "priceCents"]}
+  }
+}
+```
+
+`GET /books?title=dune&priceCents[lte]=2000&order[priceCents]=desc&page=2` filters, sorts (then by `id`), paginates, counts. To hide rows, join or compute, add `"query": "book.query.ts"` (one column per property, named like it; no `LIMIT`/`ORDER BY`/count, the server wraps it):
+
+```ts
+export default function query(ctx: QueryContext): Sql {
+  return ctx.sql`SELECT id, title, price_cents AS "priceCents", published FROM book WHERE published`;
+}
+```
+
+## Keys
+
+`name`, `path`, `table` (generated SQL), `query` (script returning the read SQL), `command` (script with `create`/`update`/`remove`), `properties` (output), `input` (write body, if different), `parameters` (filters, sorting, page size, headers), `operations` (dedicated endpoints): `definitions`. Scripts: TypeScript or Starlark, same `ctx` API (`scripts`).
+
+## Topics
+
+`caddy resource guide <topic>`, one topic per call:
+
+{{range .Topics}}- `{{.Name}}` — {{.Summary}}
+{{end}}

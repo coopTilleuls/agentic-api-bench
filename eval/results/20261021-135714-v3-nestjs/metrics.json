@@ -1,0 +1,73 @@
+{
+  "task": "build",
+  "num_turns": 54,
+  "total_cost_usd": 0.31649915999999995,
+  "usage": {
+    "input_tokens": 72,
+    "output_tokens": 93979,
+    "cache_read_input_tokens": 3513050,
+    "cache_creation_input_tokens": 122428
+  },
+  "wall_seconds": 449,
+  "project_root": ".",
+  "authored_loc": 2107,
+  "authored_files": 26,
+  "scaffold_files_modified": 3,
+  "scaffold_command": null,
+  "tool_written_loc": 2109,
+  "repo_loc": 2398,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 23,
+    "parse_failures": [],
+    "cc_total": 227,
+    "cc_max_file": 44,
+    "mi_avg": 61.28,
+    "mi_files": 17,
+    "lloc": 395,
+    "functions": 89,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [
+      "src/app.module.ts",
+      "src/main.ts"
+    ],
+    "config_keys": 2,
+    "config_leaves": 2,
+    "config_files": 1,
+    "config_failures": [],
+    "sql_statements": 17,
+    "sql_joins": 3,
+    "sql_subqueries": 0,
+    "sql_where_predicates": 17,
+    "sql_tokens": 461,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "src/authors/authors.service.ts",
+        "statements": 3,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/books/books.service.ts",
+        "statements": 4,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/purchases/purchases.service.ts",
+        "statements": 9,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/reports/reports.controller.ts",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "nestjs",
+    "ast_metrics": "0.43.1"
+  }
+}

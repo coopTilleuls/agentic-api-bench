@@ -1,0 +1,30 @@
+{
+  "name": "Purchase",
+  "path": "/purchases",
+  "query": "purchase.query.ts",
+  "command": "purchase.command.ts",
+  "itemsPerPage": 10,
+  "order": {"createdAt": "desc"},
+  "allow": {"fetch": ["127.0.0.1:18090"]},
+  "input": {
+    "lines": {"type": "array", "required": true, "minItems": 1, "items": {"type": "object", "properties": {
+      "bookId": {"type": "integer", "required": true},
+      "quantity": {"type": "integer", "required": true, "min": 1}
+    }}}
+  },
+  "parameters": {
+    "Customer-Id": {"in": "header", "type": "integer", "required": true, "status": 401, "handler": "customer.handler.ts"},
+    "itemsPerPage": {"in": "query", "type": "integer", "min": 1, "max": 50, "pagination": "itemsPerPage"}
+  },
+  "properties": {
+    "id": {"type": "integer", "identifier": true},
+    "createdAt": {"type": "datetime"},
+    "totalCents": {"type": "integer"},
+    "lines": {"type": "array", "items": {"type": "object", "properties": {
+      "bookId": {"type": "integer"},
+      "title": {"type": "string"},
+      "quantity": {"type": "integer"},
+      "unitPriceCents": {"type": "integer"}
+    }}}
+  }
+}

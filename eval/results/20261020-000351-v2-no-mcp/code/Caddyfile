@@ -1,0 +1,21 @@
+{
+	admin off
+}
+
+:8089 {
+	resource {
+		dir resources
+		dsn postgres://eval_rw:eval_rw@postgres:5432/llmapi_eval
+		formats json
+		envelope {
+			items items
+			total total
+			page page
+			itemsPerPage itemsPerPage
+		}
+		errors {
+			error message
+		}
+		error_details off
+	}
+}

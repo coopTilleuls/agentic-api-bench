@@ -1,0 +1,25 @@
+{
+  "name": "Author",
+  "table": "author",
+  "query": "author.query.ts",
+  "itemsPerPage": 10,
+  "relations": {
+    "books": {"resource": "Book", "foreignKey": "author_id", "many": true}
+  },
+  "parameters": {
+    "itemsPerPage": {"in": "query", "type": "integer", "min": 1, "max": 50, "pagination": "itemsPerPage"}
+  },
+  "operations": [
+    {"method": "GET", "path": "/authors", "output": ["id", "name", "publishedBooks"]},
+    {"method": "GET", "path": "/authors/{id}", "output": ["id", "name", "books"]}
+  ],
+  "properties": {
+    "id": {"type": "integer", "identifier": true},
+    "name": {"type": "string"},
+    "publishedBooks": {"type": "integer", "computed": true},
+    "books": {"type": "array", "items": {"type": "object", "properties": {
+      "id": {"type": "integer"},
+      "title": {"type": "string"}
+    }}}
+  }
+}

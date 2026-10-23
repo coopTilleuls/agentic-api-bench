@@ -1,0 +1,25 @@
+api_platform:
+    title: Bookshop API
+    version: 1.0.0
+    formats:
+        jsonapi: ['application/vnd.api+json']
+    error_formats:
+        jsonapi: ['application/vnd.api+json']
+    docs_formats:
+        jsonopenapi: ['application/vnd.openapi+json']
+    collection:
+        pagination:
+            page_parameter_name: number
+            items_per_page_parameter_name: size
+    defaults:
+        stateless: true
+        pagination_items_per_page: 10
+        pagination_client_items_per_page: true
+        pagination_maximum_items_per_page: 50
+        collect_denormalization_errors: true
+        normalization_context:
+            skip_null_values: false
+        cache_headers:
+            vary: ['Content-Type', 'Accept', 'Customer-Id']
+    jsonapi:
+        strict_member_names: true

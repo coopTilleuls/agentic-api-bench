@@ -1,0 +1,15 @@
+{
+  "name": "SalesReport",
+  "parameters": {
+    "from": {"in": "query", "type": "date", "required": true},
+    "to": {"in": "query", "type": "date", "required": true}
+  },
+  "operations": [
+    {"method": "GET", "path": "/reports/sales", "format": "csv", "query": "sales_report.star"}
+  ],
+  "properties": {
+    "title": {"type": "string"},
+    "quantity": {"type": "integer"},
+    "revenueCents": {"type": "integer"}
+  }
+}

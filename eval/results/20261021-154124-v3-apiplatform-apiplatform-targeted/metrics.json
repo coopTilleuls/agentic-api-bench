@@ -1,0 +1,70 @@
+{
+  "task": "build",
+  "num_turns": 77,
+  "total_cost_usd": 0.9278101300000002,
+  "usage": {
+    "input_tokens": 154,
+    "output_tokens": 149071,
+    "cache_read_input_tokens": 11318151,
+    "cache_creation_input_tokens": 212989
+  },
+  "wall_seconds": 746,
+  "project_root": ".",
+  "authored_loc": 1413,
+  "authored_files": 23,
+  "scaffold_files_modified": 3,
+  "scaffold_command": null,
+  "tool_written_loc": 447,
+  "repo_loc": 3573,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 18,
+    "parse_failures": [],
+    "cc_total": 206,
+    "cc_max_file": 67,
+    "mi_avg": 83.76,
+    "mi_files": 16,
+    "lloc": 309,
+    "functions": 65,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 21,
+    "config_leaves": 16,
+    "config_files": 4,
+    "config_failures": [],
+    "sql_statements": 1,
+    "sql_joins": 2,
+    "sql_subqueries": 0,
+    "sql_where_predicates": 2,
+    "sql_tokens": 88,
+    "qb_calls": 23,
+    "sql_files": [
+      {
+        "file": "src/Doctrine/AuthorQueryExtension.php",
+        "statements": 0,
+        "qb_calls": 1
+      },
+      {
+        "file": "src/Doctrine/BookQueryExtension.php",
+        "statements": 0,
+        "qb_calls": 18
+      },
+      {
+        "file": "src/Doctrine/PurchaseQueryExtension.php",
+        "statements": 0,
+        "qb_calls": 4
+      },
+      {
+        "file": "src/State/SalesReportProvider.php",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "apiplatform",
+    "ast_metrics": "0.43.1"
+  }
+}

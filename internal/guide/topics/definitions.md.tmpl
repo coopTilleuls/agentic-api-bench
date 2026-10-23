@@ -1,0 +1,74 @@
+# Definitions
+
+Definitions: `.json`/`.ts` files directly in the directory, named after the resource (`Book.json`), except `*.query.ts`, `*.command.ts` (and `.js`), `*.d.ts`, `package.json`, `tsconfig.json`, names starting with `.` or `_`. `.star`/`.py` are always scripts; subdirectories are ignored.
+
+`table` plus `query` is the usual shape: the table describes the resource (columns, relations, helpers, generated writes), the query reads:
+
+```json
+{
+  "name": "Book",
+  "path": "/books",
+  "table": "book",
+  "query": "book.query.ts",
+  "relations": {"author": {"resource": "Author", "column": "author_id"}},
+  "properties": {
+    "id": {"type": "integer", "identifier": true},
+    "priceCents": {"type": "integer", "column": "price_cents"},
+    "author": {"type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}}}
+  }
+}
+```
+
+TypeScript (`Author.ts`; `defineResource` is a global identity function): `export default defineResource({ name: "Author", path: "/authors", table: "author", properties: { id: { type: "integer", identifier: true } } });`
+
+`properties` is the output, `input` the body; they may differ.
+
+## Keys
+
+`key` (required?) — rules:
+
+- `name` (yes) — PascalCase singular (`BookReview`); JSON-LD `@type`, `/contexts/<name>`; unique.
+- `path` (unless `operations`) — lowercase, leading slash, no trailing slash (`/book-reviews`); unique. Reserved: {{.Reserved}}.
+- `table` — `table` or `schema.table`; alone it reads the properties' `column`s. `table` and/or `query` required.
+- `query` — script in the same directory, no directory part: `<name>.query.ts`, `<name>.star`, `<name>.py` (`queries`).
+- `command` — `<name>.command.ts`, `.star`, `.py` (`commands`); makes a `query` resource writable, replaces generated SQL.
+- `relations` — to-one `{"author": {"resource": "Author", "column": "author_id"}}` (`column` of this table), to-many `{"books": {"resource": "Book", "foreignKey": "author_id", "many": true}}` (`foreignKey` of the related table); the related resource needs a `table`; used by `ctx.resource()`.
+- `parameters` — `parameters`.
+- `order` — default sort `{"createdAt": "desc"}`; identifier added last.
+- `envelope`, `errors`, `errorDetails` — per-resource Caddyfile options (`formats`).
+- `unknownInput` — `"reject"` (default) or `"ignore"`.
+- `input` — body of `POST`/`PUT`/`PATCH`: name to `{type, required, description}` plus the input keys of `commands`; default: non-`readOnly` properties; with generated SQL, names must be columns.
+- `readOnly` — `true`: writes answer `405`.
+- `formats` — among `jsonld`, `json`, `csv`; default all.
+- `operations` — dedicated endpoints (`operations`).
+- `allow` — `{"fetch": ["api.example.com", "127.0.0.1:9000"], "env": ["API_TOKEN"]}`: hosts (`host[:port]`) for `ctx.fetch`, variables for `ctx.env`; all else denied.
+- `properties` (yes) — name to property, in output (CSV column) order; the query returns a column named like each.
+- `itemsPerPage` — page size 1..1000, default 30; clients change it only via a `pagination: "itemsPerPage"` parameter.
+- `description` — OpenAPI text (also on properties).
+
+Property keys:
+
+- `type` (yes) — `string`, `integer`, `number`, `boolean`, `date`, `datetime`, `object` (needs `properties`), `array` (needs `items`); columns below.
+- `identifier` — exactly one property (at most one with `operations`); `integer` or `string`; used in item URLs and ordering.
+- `filterable` — `?<property>=<value>` exact match (shorthand, `parameters`).
+- `required` — must be in `POST`/`PUT` bodies.
+- `readOnly` — output only; rejected in bodies without `input` (serials, computed columns).
+- `column` — table column when it differs from the name.
+- `computed` — not a table column; `columns()` skips it.
+- `properties` / `items` — nested properties (`object`); the element property (`array`).
+
+Property names are free-form JSON keys: anything without `.`, `[`, `]` or whitespace (`order-data`). The default `column` replaces runs of non-identifier characters with `_` (`order_data`); set `column` explicitly otherwise. Other keys are `unknown_field` (closed schema: `schema`).
+
+## Types
+
+`type` — PostgreSQL columns; JSON form:
+
+- `string` — text, varchar, char, uuid, name, enums, domains.
+- `integer` — smallint, integer, bigint (serial); number without decimals.
+- `number` — integer types, real, double precision, numeric.
+- `boolean` — boolean. `date` — date, `"2024-01-31"`.
+- `datetime` — timestamp, timestamptz, date; RFC 3339 UTC `"2024-01-31T12:00:00Z"`, input also `"2024-01-31"`.
+- `object` — json, jsonb, or columns `<property>_<nested>`; `null` when all are NULL.
+- `array` — json, jsonb (`json_agg(...)`).
+
+NULL is `null`. A mismatch is `type_mismatch`: change the type or cast (`price::float8 AS price`).

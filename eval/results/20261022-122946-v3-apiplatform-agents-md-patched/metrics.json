@@ -1,0 +1,70 @@
+{
+  "task": "build",
+  "num_turns": 115,
+  "total_cost_usd": 1.35387209,
+  "usage": {
+    "input_tokens": 224,
+    "output_tokens": 171373,
+    "cache_read_input_tokens": 17314651,
+    "cache_creation_input_tokens": 246815
+  },
+  "wall_seconds": 2885,
+  "project_root": ".",
+  "authored_loc": 1808,
+  "authored_files": 30,
+  "scaffold_files_modified": 5,
+  "scaffold_command": null,
+  "tool_written_loc": 440,
+  "repo_loc": 3990,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 24,
+    "parse_failures": [],
+    "cc_total": 227,
+    "cc_max_file": 40,
+    "mi_avg": 83.34,
+    "mi_files": 20,
+    "lloc": 424,
+    "functions": 78,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 19,
+    "config_leaves": 16,
+    "config_files": 4,
+    "config_failures": [],
+    "sql_statements": 13,
+    "sql_joins": 5,
+    "sql_subqueries": 2,
+    "sql_where_predicates": 14,
+    "sql_tokens": 422,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "src/Controller/SalesReportController.php",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/EventListener/CustomerIdListener.php",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Service/Catalog.php",
+        "statements": 8,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Service/Checkout.php",
+        "statements": 3,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "apiplatform",
+    "ast_metrics": "0.43.1"
+  }
+}

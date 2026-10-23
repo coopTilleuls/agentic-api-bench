@@ -1,0 +1,12 @@
+# MCP
+
+`/mcp`: JSON-RPC 2.0, `POST` a message, plain JSON response; up even when every definition is invalid. `caddy resource mcp --http ADDR` serves the same tools without a `Caddyfile`; over stdio only the first three. Tools:
+
+- `framework_guide` — none, or one `topic`: this guide.
+- `validate` — none (re-reads and reloads the directory), or `definition` (source), `filename` (`Book.json`/`Book.ts`), `query` (source of its query file): the report (`errors`).
+- `list_resources` — name, path, table or query, properties.
+- `list_<name>` — `page`, one argument per declared query parameter (`order[title]`, `priceCents[gte]`); `GET <path>`. `<name>` is snake_case (`list_book_review`); header parameters come from the `/mcp` request headers.
+- `get_<name>` (`id`), `create_<name>` (writable properties), `update_<name>` (`id` + changes, `PATCH`), `delete_<name>` (`id`).
+- `<method>_<path>` — one per operation (`get_business_export`, `get_authors_item` for `GET /authors/{id}`): `GET` takes `page` and parameters, others the body (and `id`).
+
+`curl -s localhost:8080/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"validate","arguments":{}}}'`

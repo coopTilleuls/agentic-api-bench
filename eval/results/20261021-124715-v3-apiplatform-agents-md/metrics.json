@@ -1,0 +1,70 @@
+{
+  "task": "build",
+  "num_turns": 117,
+  "total_cost_usd": 1.1476627400000003,
+  "usage": {
+    "input_tokens": 194,
+    "output_tokens": 151396,
+    "cache_read_input_tokens": 14723864,
+    "cache_creation_input_tokens": 219772
+  },
+  "wall_seconds": 874,
+  "project_root": ".",
+  "authored_loc": 1947,
+  "authored_files": 27,
+  "scaffold_files_modified": 4,
+  "scaffold_command": null,
+  "tool_written_loc": 1658,
+  "repo_loc": 4122,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 22,
+    "parse_failures": [],
+    "cc_total": 213,
+    "cc_max_file": 44,
+    "mi_avg": 74.17,
+    "mi_files": 18,
+    "lloc": 393,
+    "functions": 81,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 18,
+    "config_leaves": 17,
+    "config_files": 3,
+    "config_failures": [],
+    "sql_statements": 18,
+    "sql_joins": 3,
+    "sql_subqueries": 0,
+    "sql_where_predicates": 17,
+    "sql_tokens": 396,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "src/Bookshop/Catalog.php",
+        "statements": 6,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Bookshop/Purchases.php",
+        "statements": 9,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Bookshop/SalesReport.php",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "src/Controller/BookUpdate.php",
+        "statements": 2,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "apiplatform",
+    "ast_metrics": "0.43.1"
+  }
+}

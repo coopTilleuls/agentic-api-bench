@@ -1,0 +1,19 @@
+api_platform:
+    title: Bookshop API
+    version: 1.0.0
+    formats:
+        jsonapi:
+            mime_types: ['application/vnd.api+json']
+        json:
+            mime_types: ['application/json']
+        csv:
+            mime_types: ['text/csv']
+    docs_formats:
+        json:
+            mime_types: ['application/json', 'application/vnd.api+json']
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    jsonapi:
+        strict_member_names: true

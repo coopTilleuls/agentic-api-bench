@@ -1,0 +1,54 @@
+# Parameters
+
+`parameters` (per definition, or per operation where it adds to or overrides by name) maps query string or header values; the key is the name:
+
+```json
+"parameters": {
+  "title":        {"in": "query", "filter": "ipartial"},
+  "inStock":      {"in": "query", "type": "boolean", "handler": "in_stock.handler.ts"},
+  "order":        {"in": "query", "filter": "order", "properties": ["priceCents", "title"]},
+  "itemsPerPage": {"in": "query", "type": "integer", "min": 1, "max": 50, "pagination": "itemsPerPage"},
+  "Customer-Id":  {"in": "header", "type": "integer", "required": true, "status": 401, "handler": "customer.handler.ts"}
+}
+```
+
+- `in` — `query` (collection reads only) or `header` (every request, first). Name headers without `X-` (RFC 6648): `Customer-Id`; `X-` warns `deprecated_header_prefix`.
+- `type` — `string` (default), `integer`, `number`, `boolean` (`true`/`false`/`1`/`0`), `date` (`YYYY-MM-DD`), `datetime`; filters default to their property's type.
+- `required`, `min`, `max`, `enum` — validation.
+- `status` — HTTP status of a missing/invalid value and default of `ctx.reject` in its handler (default `400`); parameters with a `status` are checked first (an auth header answers `401` before anything else).
+- `filter` — built-in filter below; `property` is the filtered property (default: the name; `author.name` nested).
+- `pagination` — `page` or `itemsPerPage` (bound with `min`/`max`).
+- `handler` — script `<name>.handler.ts`, `.star`, `.py`.
+- `description` — OpenAPI{{if .MCP}}, `list_resources`, tool schemas{{end}}.
+
+Parsing precedes any script: malformed is `400 invalid_parameter` (or `status`), missing required `400 missing_parameter`, bad filter value `400 invalid_filter_value`. Undeclared query parameters are ignored. `?page=N` (positive integer, else `400 invalid_page`) always works; past the last page the list is empty; page size is the definition's unless a `pagination: "itemsPerPage"` parameter exists. Without `parameters`, `"filterable": true` enables `?<property>=<value>` and a non-filterable property in the query is `400 filter_not_enabled`.
+
+## Filters
+
+`filter` — request; condition:
+
+- `exact` — `?author=Frank%20Herbert`, `?author[]=a&author[]=b`; `=` / `= ANY`.
+- `partial`, `ipartial` — `?title=dune`; contains, case-sensitive / insensitive (`%` `_` literal).
+- `range` — `?priceCents[gte]=1000&priceCents[lte]=2000` (`gt`, `gte`, `lt`, `lte`); number, integer, date, datetime properties.
+- `date` — `?publishedAt[after]=2020-01-01&publishedAt[before]=2020-12-31`; `after`/`before` inclusive, `strictly_after`/`strictly_before` exclusive.
+- `boolean` — `?published=true`.
+- `order` — `?order[priceCents]=desc&order[title]=asc`; in the order sent, then identifier; `asc`/`desc` any case, anything else `400`; default: the definition's `order`.
+
+## Handlers
+
+A handler gets the parsed value when the parameter is present and returns a SQL condition over the query's result (added to `WHERE`; name columns with `ctx.property("stock")`, `"author.name"` for nested), `null` for nothing, or `ctx.reject(...)`. `ctx.set(name, value)` stores a value that the query, command and later handlers read with `ctx.get(name)`, which also returns any parsed parameter (`null` during validation).
+
+```ts
+// in_stock.handler.ts
+export default function inStock(value: boolean, ctx) {
+  return value ? ctx.sql`${ctx.property("stock")} > 0` : ctx.sql`${ctx.property("stock")} = 0`;
+}
+// customer.handler.ts: 401 for an unknown customer (the parameter's status)
+export default function customer(id: number, ctx) {
+  const [row] = ctx.db.query(ctx.sql`SELECT id FROM customer WHERE id = ${id}::bigint`);
+  if (!row) ctx.reject({ message: `unknown customer ${id}` });
+  ctx.set("customer", row.id);
+  return null;
+}
+```
+

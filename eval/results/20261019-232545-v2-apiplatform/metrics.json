@@ -1,0 +1,18 @@
+{
+  "num_turns": 81,
+  "total_cost_usd": 0.5557297400000001,
+  "usage": {
+    "input_tokens": 160,
+    "output_tokens": 100884,
+    "cache_read_input_tokens": 8290126,
+    "cache_creation_input_tokens": 131785
+  },
+  "wall_seconds": 530,
+  "authored_loc": 1351,
+  "authored_files": 37,
+  "scaffold_files_modified": 10,
+  "scaffold_command": "composer create-project symfony/skeleton:\"7.3.*\" . --no-interaction --no-scripts 2>",
+  "tool_written_loc": 221,
+  "repo_loc": 1548,
+  "repo_loc_tool": "scc"
+}

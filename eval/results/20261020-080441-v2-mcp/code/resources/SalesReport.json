@@ -1,0 +1,16 @@
+{
+  "name": "SalesReport",
+  "description": "Books sold between two dates (UTC, bounds included), as CSV.",
+  "operations": [
+    {"method": "GET", "path": "/reports/sales", "format": "csv", "query": "sales_report.query.ts",
+     "parameters": {
+       "from": {"in": "query", "type": "date", "required": true},
+       "to": {"in": "query", "type": "date", "required": true}
+     }}
+  ],
+  "properties": {
+    "title": {"type": "string"},
+    "quantity": {"type": "integer"},
+    "revenueCents": {"type": "integer"}
+  }
+}

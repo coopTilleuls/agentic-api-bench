@@ -1,0 +1,36 @@
+{
+  "imperative_files": 21,
+  "parse_failures": [],
+  "cc_total": 224,
+  "cc_max_file": 48,
+  "mi_avg": 84.27,
+  "mi_files": 20,
+  "lloc": 367,
+  "functions": 73,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 9,
+  "config_leaves": 8,
+  "config_files": 3,
+  "config_failures": [],
+  "sql_statements": 14,
+  "sql_joins": 5,
+  "sql_subqueries": 3,
+  "sql_where_predicates": 18,
+  "sql_tokens": 397,
+  "qb_calls": 23,
+  "sql_files": [
+    {
+      "file": "src/Http/CustomerIdentificationListener.php",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "src/Repository/BookshopRepository.php",
+      "statements": 13,
+      "qb_calls": 23
+    }
+  ],
+  "stack": "apiplatform",
+  "ast_metrics": "0.43.1"
+}

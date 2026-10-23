@@ -1,0 +1,13 @@
+{
+  "name": "Quote",
+  "path": "/quotes",
+  "query": "quote.star",
+  "readOnly": true,
+  "itemsPerPage": 2,
+  "allow": {"fetch": ["127.0.0.1:18090"]},
+  "properties": {
+    "id": {"type": "integer", "identifier": true},
+    "text": {"type": "string"},
+    "author": {"type": "string", "filterable": true}
+  }
+}

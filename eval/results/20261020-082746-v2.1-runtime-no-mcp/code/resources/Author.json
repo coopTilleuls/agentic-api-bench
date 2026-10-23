@@ -1,0 +1,20 @@
+{
+  "name": "Author",
+  "description": "Authors, with their published books.",
+  "query": "author.query.ts",
+  "itemsPerPage": 10,
+  "parameters": {
+    "hasPublishedBooks": {"in": "query", "type": "string", "enum": ["true", "false"], "handler": "has_published_books.handler.ts"},
+    "itemsPerPage": {"in": "query", "type": "integer", "min": 1, "max": 50, "pagination": "itemsPerPage"}
+  },
+  "properties": {
+    "id": {"type": "integer", "identifier": true},
+    "name": {"type": "string"},
+    "publishedBooks": {"type": "integer"},
+    "books": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "integer"}, "title": {"type": "string"}}}}
+  },
+  "operations": [
+    {"method": "GET", "path": "/authors", "output": ["id", "name", "publishedBooks"]},
+    {"method": "GET", "path": "/authors/{id}", "output": ["id", "name", "books"]}
+  ]
+}

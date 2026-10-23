@@ -1,0 +1,80 @@
+{
+  "task": "build",
+  "num_turns": 29,
+  "total_cost_usd": 0.14294935,
+  "usage": {
+    "input_tokens": 58,
+    "output_tokens": 51881,
+    "cache_read_input_tokens": 2099565,
+    "cache_creation_input_tokens": 111960
+  },
+  "wall_seconds": 261,
+  "project_root": ".",
+  "authored_loc": 233,
+  "authored_files": 14,
+  "scaffold_files_modified": 0,
+  "scaffold_command": null,
+  "tool_written_loc": 0,
+  "repo_loc": 212,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": false,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 8,
+    "parse_failures": [],
+    "cc_total": 25,
+    "cc_max_file": 15,
+    "mi_avg": 78.8,
+    "mi_files": 8,
+    "lloc": 39,
+    "functions": 15,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 192,
+    "config_leaves": 133,
+    "config_files": 4,
+    "config_failures": [],
+    "sql_statements": 9,
+    "sql_joins": 4,
+    "sql_subqueries": 3,
+    "sql_where_predicates": 12,
+    "sql_tokens": 420,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "resources/author.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/book.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/customer.handler.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/purchase.command.ts",
+        "statements": 4,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/purchase.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/sales_report.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "runtime",
+    "ast_metrics": "0.43.1"
+  }
+}

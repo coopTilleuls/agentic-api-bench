@@ -1,0 +1,300 @@
+start_wait: 30s
+start_ready: 1s
+== OpenAPI
+PASS  openapi: GET /openapi.json is 200
+PASS  openapi: served as JSON
+PASS  openapi: version is 3.0 or 3.1
+PASS  openapi: GET /books is described
+PASS  openapi: GET /books/{id} is described
+PASS  openapi: GET /authors is described
+PASS  openapi: GET /authors/{id} is described
+PASS  openapi: GET /purchases is described
+PASS  openapi: GET /purchases/{id} is described
+PASS  openapi: GET /reports/sales is described
+PASS  openapi: PATCH /books/{id} is described
+PASS  openapi: POST /purchases is described
+PASS  openapi: GET /books declares filter[title]
+PASS  openapi: GET /books declares filter[author]
+PASS  openapi: GET /books declares filter[minPrice]
+PASS  openapi: GET /books declares filter[maxPrice]
+PASS  openapi: GET /books declares filter[publishedAfter]
+PASS  openapi: GET /books declares filter[publishedBefore]
+PASS  openapi: GET /books declares filter[inStock]
+PASS  openapi: GET /books declares sort
+PASS  openapi: GET /books declares include
+PASS  openapi: GET /books declares page[number]
+PASS  openapi: GET /books declares page[size]
+PASS  openapi: GET /purchases declares the Customer-Id header
+PASS  openapi: GET /purchases/{id} declares the Customer-Id header
+PASS  openapi: POST /purchases declares the Customer-Id header
+PASS  openapi: PATCH /books/{id} body is application/vnd.api+json with title, priceCents and stock
+PASS  openapi: POST /purchases body schema mentions lines
+PASS  openapi: POST /purchases declares a 201 response
+PASS  openapi: POST /purchases declares a 422 response
+PASS  openapi: GET /books/{id} declares a 404 response
+PASS  openapi: GET /books 200 response has a schema
+PASS  openapi: GET /books/{id} 200 response has a schema declaring title and priceCents
+== Books: list, pagination
+PASS  books: list is 200
+PASS  books: response is application/vnd.api+json
+PASS  books: total counts published books only (14)
+PASS  books: 10 per page by default
+PASS  books: id order by default, unpublished absent
+PASS  books: item shape (type, id string, attributes, author linkage)
+PASS  books: without include, included is absent or empty
+PASS  books: anonymous author linkage
+PASS  jsonapi: every book has type books and a string id
+PASS  jsonapi: every book links.self is /books/<id>
+PASS  jsonapi: first link is page 1
+PASS  jsonapi: last link is page 2
+PASS  jsonapi: next link is page 2
+PASS  jsonapi: no prev link on the first page
+PASS  jsonapi: links point at /books
+PASS  books: page 2
+PASS  books: page 2 keeps the total
+PASS  jsonapi: page 2 has prev page 1
+PASS  jsonapi: page 2 has no next
+PASS  jsonapi: page 2 last is page 2
+PASS  books: page past the last is 200
+PASS  books: page past the last has empty data
+PASS  books: page past the last keeps the total
+PASS  books: page[size]=5 page 3
+PASS  books: page[size]=5 page 3 total
+PASS  books: page[size]=1 last page
+PASS  books: page[size]=50 is allowed
+PASS  books: page[size]=0 is 400 with source.parameter
+PASS  books: page[size]=51 is 400 with source.parameter
+PASS  books: page[size]=abc is 400 with source.parameter
+PASS  books: page[size]=-1 is 400 with source.parameter
+PASS  books: page[size]=2.5 is 400 with source.parameter
+PASS  books: page[number]=abc is 400 with source.parameter
+PASS  books: unknown parameters and filter keys are ignored
+PASS  jsonapi: filtered page 2 members
+PASS  jsonapi: filtered view next keeps filter and size
+PASS  jsonapi: filtered view prev keeps filter and size
+PASS  jsonapi: filtered view first keeps filter and size
+PASS  jsonapi: filtered view last keeps filter and size
+PASS  jsonapi: view next keeps range, sort and stock parameters
+PASS  jsonapi: view next keeps include and a multi-key sort
+== Books: filters
+PASS  filter title: contains, case-insensitive
+PASS  filter title: upper case query
+PASS  filter title: apostrophe
+PASS  filter title: % is a literal character
+PASS  filter title: % total is 0
+PASS  filter title: _ is a literal character
+PASS  filter author: exact name
+PASS  filter author: not a substring match
+PASS  filter minPrice: 1000 included, 999 excluded
+PASS  filter minPrice: total 12
+PASS  filter maxPrice: 2000 included, 2001 excluded
+PASS  filter maxPrice: total 11
+PASS  filter price range
+PASS  filter publishedAfter: bound included
+PASS  filter publishedBefore: bound included
+PASS  filter publishedBefore: total 12
+PASS  filter published range
+PASS  filter inStock=true: stock > 0
+PASS  filter inStock=true: total 11
+PASS  filter inStock=false: stock 0
+PASS  filters combined with sorting
+PASS  filters combined with pagination
+PASS  filters combined with pagination: total 5
+PASS  filters combined with include
+PASS  filter filter[minPrice]=abc is 400 with source.parameter
+PASS  filter filter[maxPrice]= is 400 with source.parameter
+PASS  filter filter[publishedAfter]=2020-13-01 is 400 with source.parameter
+PASS  filter filter[publishedBefore]=yesterday is 400 with source.parameter
+PASS  filter filter[publishedAfter]=2020-02-30 is 400 with source.parameter
+PASS  filter filter[inStock]=yes is 400 with source.parameter
+== Books: sorting
+PASS  sort priceCents asc, ties by id
+PASS  sort priceCents asc, page 2
+PASS  sort priceCents desc, ties by id ascending
+PASS  sort title asc, ties by id
+PASS  sort title desc, page 2
+PASS  sort publishedAt asc
+PASS  sort publishedAt desc, ties by id
+PASS  sort: several keys in the order given
+PASS  sort: keys reversed give another order
+PASS  sort=stock is 400 with source.parameter
+PASS  sort=-stock is 400 with source.parameter
+PASS  sort=id is 400 with source.parameter
+PASS  sort=title,nope is 400 with source.parameter
+== Books: items, include
+PASS  book 4: 200
+PASS  book 4: application/vnd.api+json
+PASS  book 4: shape
+PASS  jsonapi: book 4 id is a string and links.self is /books/4
+PASS  book 4: without include, included is absent or empty
+PASS  book 4: include=author adds the author
+PASS  book 4: include=author has no duplicate or unrelated resource
+PASS  include=author on a list: every author linked is included once
+PASS  include=author on a list: anonymous author name is null
+PASS  include=author on a list: included authors link themselves
+PASS  book 10: anonymous author linkage
+PASS  unpublished book is 404 error document
+PASS  errors: status is a string
+PASS  errors: 404 has title and detail
+PASS  unknown book is 404 error document
+PASS  malformed book id is 404 error document
+PASS  unknown include path is 400 with source.parameter
+PASS  unknown include path on a list is 400 with source.parameter
+== Authors
+PASS  authors: list
+PASS  authors: total 5
+PASS  jsonapi: authors have type authors, a string id and links.self
+PASS  authors: publishedBooks counts published books only
+PASS  authors: anonymous author has a null name
+PASS  jsonapi: authors links, single page
+PASS  authors: paginated
+PASS  authors: paginated total
+PASS  author 1: type, id, attributes
+PASS  author 1: books relationship, published books in id order
+PASS  author 1: without include, included is absent or empty
+PASS  author 1: include=books adds the books with their titles
+PASS  author 4: anonymous, unpublished book hidden
+PASS  author 5: no published book
+PASS  unknown author is 404 error document
+PASS  malformed author id is 404 error document
+PASS  unknown include path on an author is 400 with source.parameter
+== Purchases: identification
+PASS  GET /purchases with no header is 401 error document
+PASS  GET /purchases/1 with no header is 401 error document
+PASS  GET /purchases/abc with no header is 401 error document (checked first)
+PASS  POST /purchases (invalid body) with no header is 401 error document (checked first)
+PASS  GET /purchases with Customer-Id: abc is 401 error document
+PASS  GET /purchases/1 with Customer-Id: abc is 401 error document
+PASS  GET /purchases/abc with Customer-Id: abc is 401 error document (checked first)
+PASS  POST /purchases (invalid body) with Customer-Id: abc is 401 error document (checked first)
+PASS  GET /purchases with Customer-Id: 99 is 401 error document
+PASS  GET /purchases/1 with Customer-Id: 99 is 401 error document
+PASS  GET /purchases/abc with Customer-Id: 99 is 401 error document (checked first)
+PASS  POST /purchases (invalid body) with Customer-Id: 99 is 401 error document (checked first)
+PASS  GET /purchases with Customer-Id: 1.5 is 401 error document
+PASS  GET /purchases/1 with Customer-Id: 1.5 is 401 error document
+PASS  GET /purchases/abc with Customer-Id: 1.5 is 401 error document (checked first)
+PASS  POST /purchases (invalid body) with Customer-Id: 1.5 is 401 error document (checked first)
+== Purchases: reads
+PASS  customer 1: own purchases, most recent first
+PASS  customer 1: total 4
+PASS  jsonapi: purchases have type purchases, a string id and links.self
+PASS  purchase shape: createdAt (UTC ISO 8601), totalCents, lines
+PASS  purchase timestamps parse
+PASS  jsonapi: purchases links, single page
+PASS  customer 1: paginated
+PASS  customer 1: paginated total
+PASS  customer without purchases: empty list
+PASS  customer without purchases: total 0
+PASS  purchase 1: lines with stored unit prices
+PASS  purchase 5: unit price as stored, not current
+PASS  another customer's purchase is 404 error document
+PASS  the owner sees it
+PASS  unknown purchase is 404 error document
+PASS  malformed purchase id is 404 error document
+== Sales report
+PASS  report January: 200
+PASS  report: served as CSV
+PASS  report January: content
+PASS  report February: groups by book, not title
+PASS  report: last second of a day included
+PASS  report: first second of a day included
+PASS  report: empty period is 200
+PASS  report: empty period is the header only
+PASS  report ? is 400 error document
+PASS  report ?from=2026-01-01 is 400 error document
+PASS  report ?to=2026-01-31 is 400 error document
+PASS  report ?from=2026-13-01&to=2026-12-31 is 400 error document
+PASS  report ?from=2026-01-01&to=soon is 400 error document
+PASS  report ?from=2026-02-30&to=2026-03-01 is 400 error document
+PASS  report ?from=2026-02-01&to=2026-01-31 is 400 error document
+== Books: PATCH
+PASS  patch title: 200
+PASS  patch title: application/vnd.api+json
+PASS  patch title: book document, only title changed
+PASS  patch: unknown attributes ignored
+PASS  patch: stock 0 allowed
+PASS  patch: several attributes, price 0 allowed
+PASS  patch {"priceCents": -1} is 422 with a /data/attributes/priceCents pointer
+PASS  patch {"stock": -1} is 422 with a /data/attributes/stock pointer
+PASS  patch {"stock": 1.5} is 422 with a /data/attributes/stock pointer
+PASS  patch {"priceCents": "2000"} is 422 with a /data/attributes/priceCents pointer
+PASS  patch {"stock": null} is 422 with a /data/attributes/stock pointer
+PASS  patch {"title": null} is 422 with a /data/attributes/title pointer
+PASS  patch {"title": ""} is 422 with a /data/attributes/title pointer
+PASS  patch {"title": "Ok", "stock": -5} is 422 with a /data/attributes/stock pointer
+PASS  patch {"title": 42} is 422 with a /data/attributes/title pointer
+PASS  rejected patches changed nothing
+PASS  patch as application/json is 415 error document
+PASS  patch as application/json changed nothing
+PASS  patch with another data.id than the path is 409 error document
+PASS  patch with another data.id changed nothing
+PASS  patch on an unpublished book is 204
+PASS  unpublished book stays hidden
+PASS  patch unknown book is 404 error document
+PASS  patch malformed id is 404 error document
+== Errors
+PASS  errors: 404 is application/vnd.api+json
+PASS  errors: errors is a non-empty array of objects
+PASS  errors: status is the HTTP status
+PASS  errors: title is a non-empty string
+PASS  errors: detail is a non-empty string
+PASS  errors: 422 has one error per invalid field
+PASS  errors: every 422 error has status 422
+PASS  errors: 400 names the parameter in source.parameter
+== Purchases: failures change nothing
+PASS  customer 1 has 4 purchases before
+PASS  purchase {} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": []} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": "x"} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"bookId": 3, "quantity": 1}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"bookId": 999, "quantity": 1}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"bookId": 1, "quantity": 0}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"bookId": 1, "quantity": 1.5}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"bookId": 1, "quantity": "2"}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"bookId": 1}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"quantity": 1}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase {"lines": [{"bookId": 1, "quantity": 1}, {"bookId": 8, "quantity": 1}]} is 422 with a /data/attributes/lines pointer
+PASS  purchase of a book out of stock is 409 error document
+PASS  stock is checked on the total quantity across lines (409)
+PASS  one line over stock fails the whole purchase (409)
+PASS  declined payment is 402 error document
+PASS  declined: the payment service was asked for 15 x 3500
+PASS  failing payment service (500) is 502 error document
+PASS  failing: the payment service was called for customer 3
+PASS  unreachable payment service is 502 error document
+PASS  failed purchases stored nothing (customer 1)
+PASS  failed purchases stored nothing (customer 1): total
+PASS  failed purchases stored nothing (customer 3)
+PASS  failed purchases changed no stock
+PASS  failed purchases sold nothing today
+== Purchases: success
+PASS  purchase: 201
+PASS  purchase: application/vnd.api+json
+PASS  purchase: purchases document, total is the sum of the lines at current prices
+PASS  purchase: createdAt is now
+PASS  purchase: links.self is /purchases/<id>
+PASS  purchase: Location header is /purchases/<id>
+PASS  purchase: one accepted payment of 4800 for customer 1
+PASS  purchase: stock of book 1 decreased by 3
+PASS  purchase: stock of book 7 decreased by 1
+PASS  purchase: listed first for its customer
+PASS  purchase: customer total is 5
+PASS  purchase: readable by its customer, same shape
+PASS  purchase: 404 for another customer
+PASS  report: today's sale, all customers
+PASS  purchase after a price change: 201
+PASS  purchase after a price change: current price is used
+PASS  purchase after a price change: payment of 2100
+PASS  stock left exactly: last copies can be bought
+PASS  then the book is out of stock (409)
+
+FAIL  openapi: valid OpenAPI document (3.0 or 3.1)  (OpenAPIValidationError: {'type': 'object', 'properties': {'id': {'type': 'string'}, 'type': {'type': 'string'}, 'attributes': {'type': 'object', 'properties': []}}, 'required': ['type', 'id']} is not valid under any of the given schemas  Failed validating 'oneOf' in schema['properties']['components')
+PASS  jsonapi: a collection (GET /books) is valid against the JSON:API schema
+PASS  jsonapi: an item (GET /books/4) is valid against the JSON:API schema
+PASS  jsonapi: a compound document (GET /books/4?include=author) is valid against the JSON:API schema
+PASS  jsonapi: an error document (404) is valid against the JSON:API schema
+PASS  jsonapi: the purchase created by POST /purchases (201) is valid against the JSON:API schema
+validate: 5 passed, 1 failed
+score: 280 passed, 1 failed
+languages: n/a

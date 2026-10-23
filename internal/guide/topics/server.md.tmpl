@@ -1,0 +1,19 @@
+# Server: Caddyfile
+
+Caddyfile example: `core`. Options of `resource`:
+
+- `dir` — default `resources`, relative to where `caddy` starts; also `resource ./resources { ... }`.
+- `dsn` — default `$DATABASE_URL`; `{$VAR}` is replaced by an environment variable when the Caddyfile is read.
+{{- if .MCP}}
+- `mcp` — default `on`: serves `/mcp`; `off` disables it.
+{{- end}}
+- `formats`, `envelope`, `errors`, `error_details` — `formats`.
+
+The handler answers every request of the site: `/`, `/openapi.json`, `/contexts/<Name>`,{{if .MCP}} `/mcp`,{{end}} resource paths; the rest is a `404` listing paths. `admin off` disables the admin API on 2019 (omit it for `caddy reload`/`caddy stop`).
+
+- `caddy run [--config Caddyfile]` — start in the foreground (`./Caddyfile` default); background it: `caddy run > caddy.log 2>&1 &`.
+- `caddy validate [--config Caddyfile]` — load the Caddyfile and check definitions against the database without serving.
+- `caddy adapt --config Caddyfile` — print the JSON config.
+- `caddy resource ...` — `commands`.
+
+Definition and script changes are picked up within a second; restart (`pkill -f 'caddy run'`) only after editing the `Caddyfile`. `caddy run`/`validate` fail only on `Caddyfile` errors (missing `dsn`): invalid definitions are logged as a warning and answered on their paths.

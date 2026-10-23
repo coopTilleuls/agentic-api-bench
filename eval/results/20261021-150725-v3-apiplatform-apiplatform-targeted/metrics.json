@@ -1,0 +1,80 @@
+{
+  "task": "build",
+  "num_turns": 113,
+  "total_cost_usd": 1.43719522,
+  "usage": {
+    "input_tokens": 218,
+    "output_tokens": 187154,
+    "cache_read_input_tokens": 18866790,
+    "cache_creation_input_tokens": 256240
+  },
+  "wall_seconds": 943,
+  "project_root": ".",
+  "authored_loc": 1760,
+  "authored_files": 31,
+  "scaffold_files_modified": 3,
+  "scaffold_command": null,
+  "tool_written_loc": 241,
+  "repo_loc": 3919,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 25,
+    "parse_failures": [],
+    "cc_total": 199,
+    "cc_max_file": 37,
+    "mi_avg": 87.37,
+    "mi_files": 21,
+    "lloc": 364,
+    "functions": 77,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 23,
+    "config_leaves": 18,
+    "config_files": 4,
+    "config_failures": [],
+    "sql_statements": 3,
+    "sql_joins": 3,
+    "sql_subqueries": 0,
+    "sql_where_predicates": 5,
+    "sql_tokens": 143,
+    "qb_calls": 52,
+    "sql_files": [
+      {
+        "file": "src/State/AuthorProvider.php",
+        "statements": 0,
+        "qb_calls": 6
+      },
+      {
+        "file": "src/State/BookProvider.php",
+        "statements": 0,
+        "qb_calls": 29
+      },
+      {
+        "file": "src/State/PurchaseProcessor.php",
+        "statements": 1,
+        "qb_calls": 1
+      },
+      {
+        "file": "src/State/PurchaseProvider.php",
+        "statements": 0,
+        "qb_calls": 15
+      },
+      {
+        "file": "src/State/ResourceMapper.php",
+        "statements": 1,
+        "qb_calls": 1
+      },
+      {
+        "file": "src/State/SalesReportProvider.php",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "apiplatform",
+    "ast_metrics": "0.43.1"
+  }
+}

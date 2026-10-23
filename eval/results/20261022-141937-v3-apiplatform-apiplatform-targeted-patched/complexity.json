@@ -1,0 +1,56 @@
+{
+  "imperative_files": 24,
+  "parse_failures": [],
+  "cc_total": 218,
+  "cc_max_file": 60,
+  "mi_avg": 91.89,
+  "mi_files": 21,
+  "lloc": 297,
+  "functions": 75,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 30,
+  "config_leaves": 25,
+  "config_files": 4,
+  "config_failures": [],
+  "sql_statements": 1,
+  "sql_joins": 2,
+  "sql_subqueries": 0,
+  "sql_where_predicates": 2,
+  "sql_tokens": 78,
+  "qb_calls": 11,
+  "sql_files": [
+    {
+      "file": "src/Doctrine/Extension/CustomerPurchaseExtension.php",
+      "statements": 0,
+      "qb_calls": 4
+    },
+    {
+      "file": "src/Doctrine/Extension/PublishedBookExtension.php",
+      "statements": 0,
+      "qb_calls": 1
+    },
+    {
+      "file": "src/Doctrine/Filter/ColumnBoundFilter.php",
+      "statements": 0,
+      "qb_calls": 2
+    },
+    {
+      "file": "src/Doctrine/Filter/InStockFilter.php",
+      "statements": 0,
+      "qb_calls": 2
+    },
+    {
+      "file": "src/Doctrine/Filter/SortListFilter.php",
+      "statements": 0,
+      "qb_calls": 2
+    },
+    {
+      "file": "src/State/SalesReportProvider.php",
+      "statements": 1,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "apiplatform",
+  "ast_metrics": "0.43.1"
+}

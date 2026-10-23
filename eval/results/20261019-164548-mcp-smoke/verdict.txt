@@ -1,0 +1,1 @@
+REJECTED: no init event (see /home/soyuka/projects/llm-api/eval/results/20261019-164548-mcp-smoke/claude.stderr)

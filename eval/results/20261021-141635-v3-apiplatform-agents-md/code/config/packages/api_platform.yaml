@@ -1,0 +1,13 @@
+api_platform:
+    title: Bookshop API
+    version: 1.0.0
+    formats:
+        jsonapi: ['application/vnd.api+json']
+    defaults:
+        stateless: true
+        pagination_items_per_page: 10
+        pagination_maximum_items_per_page: 50
+        pagination_client_items_per_page: true
+        pagination_client_enabled: false
+    jsonapi:
+        use_iri_as_id: false

@@ -1,0 +1,35 @@
+PASS  books: list is 200
+PASS  books: only published books are counted (5)
+PASS  books: 2 per page
+PASS  books: ordered by id, with the author name
+PASS  books: page 3 holds the 5th published book
+PASS  books: filter by author name
+PASS  books: item lookup
+PASS  books: unpublished book is 404
+PASS  books: unknown book is 404
+PASS  authors: list counts all authors (4)
+PASS  authors: item lookup
+PASS  quotes: list from the external service
+PASS  quotes: fields mapped (text, author)
+PASS  quotes: filter by author
+PASS  quotes: pagination
+PASS  quotes: item lookup
+PASS  quotes: unknown quote is 404
+PASS  export: 200
+PASS  export: served as CSV
+PASS  export: exact CSV content
+PASS  authors: create is 201
+PASS  authors: create returns the author
+PASS  books: create is 201
+PASS  books: create returns the book with its author name
+PASS  books: created book is listed
+PASS  books: publishing for an author without name is 422
+PASS  books: missing title is rejected (400/422)
+PASS  books: rejected creates left nothing behind
+PASS  books: patch is 200
+PASS  books: patch returns the updated book
+PASS  books: delete is 204
+PASS  books: deleted book is 404
+
+score: 32 passed, 0 failed
+languages: json-definition=4 typescript=5

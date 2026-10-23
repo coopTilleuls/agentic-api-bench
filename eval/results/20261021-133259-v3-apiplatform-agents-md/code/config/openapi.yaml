@@ -1,0 +1,538 @@
+openapi: 3.0.3
+info:
+  title: Bookshop API
+  version: 1.0.0
+  description: >-
+    JSON:API 1.1 bookshop. Responses are application/vnd.api+json except the sales
+    report (text/csv) and 204 answers. Purchase endpoints identify the customer with
+    the Customer-Id header.
+servers:
+  - url: http://localhost:8089
+paths:
+  /authors:
+    get:
+      operationId: listAuthors
+      summary: List authors
+      parameters:
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/IncludeAuthorBooks'
+      responses:
+        '200':
+          description: Page of authors.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AuthorCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /authors/{id}:
+    get:
+      operationId: showAuthor
+      summary: Get one author
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/IncludeAuthorBooks'
+      responses:
+        '200':
+          description: The author.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/AuthorDocument'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /books:
+    get:
+      operationId: listBooks
+      summary: List published books
+      parameters:
+        - name: filter[title]
+          in: query
+          description: Title contains the text, case-insensitive.
+          schema: {type: string}
+        - name: filter[author]
+          in: query
+          description: Author name, exact.
+          schema: {type: string}
+        - name: filter[minPrice]
+          in: query
+          description: Minimum price in cents, inclusive.
+          schema: {type: integer}
+        - name: filter[maxPrice]
+          in: query
+          description: Maximum price in cents, inclusive.
+          schema: {type: integer}
+        - name: filter[publishedAfter]
+          in: query
+          description: Published on or after this date.
+          schema: {type: string, format: date}
+        - name: filter[publishedBefore]
+          in: query
+          description: Published on or before this date.
+          schema: {type: string, format: date}
+        - name: filter[inStock]
+          in: query
+          description: true for stock greater than 0, false for stock 0.
+          schema: {type: string, enum: ['true', 'false']}
+        - name: sort
+          in: query
+          description: Comma separated fields priceCents, title, publishedAt; prefix with - for descending. Ties broken by id.
+          schema: {type: string, example: '-priceCents,title'}
+        - name: include
+          in: query
+          description: author
+          schema: {type: string, enum: [author]}
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of books.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/BookCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /books/{id}:
+    get:
+      operationId: showBook
+      summary: Get one published book
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: include
+          in: query
+          schema: {type: string, enum: [author]}
+      responses:
+        '200':
+          description: The book.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/BookDocument'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateBook
+      summary: Partially update a book, published or not
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/BookUpdateDocument'
+      responses:
+        '200':
+          description: The updated book (published books only).
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/BookDocument'
+        '204':
+          description: The book is unpublished; no content.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+  /purchases:
+    get:
+      operationId: listPurchases
+      summary: List the customer's purchases, most recent first
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+        - $ref: '#/components/parameters/PageNumber'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Page of purchases.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PurchaseCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createPurchase
+      summary: Buy books
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/PurchaseCreateDocument'
+      responses:
+        '201':
+          description: The stored purchase; Location holds its URL.
+          headers:
+            Location:
+              schema: {type: string}
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PurchaseDocument'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          $ref: '#/components/responses/PaymentDeclined'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+  /purchases/{id}:
+    get:
+      operationId: showPurchase
+      summary: Get one of the customer's purchases
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: The purchase.
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/PurchaseDocument'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /reports/sales:
+    get:
+      operationId: salesReport
+      summary: Sales of books between two dates, as CSV (public, all customers)
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: First day, included (UTC).
+          schema: {type: string, format: date}
+        - name: to
+          in: query
+          required: true
+          description: Last day, included (UTC).
+          schema: {type: string, format: date}
+      responses:
+        '200':
+          description: CSV with header title,quantity,revenueCents, sorted by revenueCents descending, then title, then book id.
+          content:
+            text/csv:
+              schema: {type: string}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Database id; a malformed id answers 404.
+      schema: {type: string}
+    CustomerId:
+      name: Customer-Id
+      in: header
+      required: true
+      description: Id of the customer; missing or unknown answers 401.
+      schema: {type: string}
+    PageNumber:
+      name: page[number]
+      in: query
+      description: Page number from 1.
+      schema: {type: integer, minimum: 1, default: 1}
+    PageSize:
+      name: page[size]
+      in: query
+      description: Items per page, from 1 to 50.
+      schema: {type: integer, minimum: 1, maximum: 50, default: 10}
+    IncludeAuthorBooks:
+      name: include
+      in: query
+      description: books adds the published books of the authors to included.
+      schema: {type: string, enum: [books]}
+  schemas:
+    Links:
+      type: object
+      properties:
+        self: {type: string}
+        first: {type: string}
+        last: {type: string}
+        prev: {type: string, nullable: true}
+        next: {type: string, nullable: true}
+    Error:
+      type: object
+      required: [status, title, detail]
+      properties:
+        status: {type: string, example: '400'}
+        title: {type: string}
+        detail: {type: string}
+        source:
+          type: object
+          properties:
+            pointer: {type: string, example: /data/attributes/priceCents}
+            parameter: {type: string, example: 'page[size]'}
+    ErrorDocument:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+    Meta:
+      type: object
+      properties:
+        totalItems: {type: integer}
+    BookAttributes:
+      type: object
+      properties:
+        title: {type: string}
+        priceCents: {type: integer}
+        publishedAt: {type: string, format: date, nullable: true}
+        stock: {type: integer}
+    BookResource:
+      type: object
+      properties:
+        type: {type: string, enum: [books]}
+        id: {type: string}
+        attributes:
+          $ref: '#/components/schemas/BookAttributes'
+        relationships:
+          type: object
+          properties:
+            author:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    type: {type: string, enum: [authors]}
+                    id: {type: string}
+        links:
+          $ref: '#/components/schemas/Links'
+    AuthorResource:
+      type: object
+      properties:
+        type: {type: string, enum: [authors]}
+        id: {type: string}
+        attributes:
+          type: object
+          properties:
+            name: {type: string, nullable: true}
+            publishedBooks: {type: integer}
+        relationships:
+          type: object
+          properties:
+            books:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type: {type: string, enum: [books]}
+                      id: {type: string}
+        links:
+          $ref: '#/components/schemas/Links'
+    AuthorRef:
+      type: object
+      properties:
+        type: {type: string, enum: [authors]}
+        id: {type: string}
+        attributes:
+          type: object
+          properties:
+            name: {type: string, nullable: true}
+    AuthorCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorResource'
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookResource'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    AuthorDocument:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AuthorResource'
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookResource'
+    BookCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookResource'
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorRef'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    BookDocument:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/BookResource'
+        included:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorRef'
+    BookUpdateDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [type, attributes]
+          properties:
+            type: {type: string, enum: [books]}
+            id: {type: string, description: Must equal the id in the path when sent.}
+            attributes:
+              type: object
+              properties:
+                title: {type: string, minLength: 1}
+                priceCents: {type: integer, minimum: 0}
+                stock: {type: integer, minimum: 0}
+    PurchaseLine:
+      type: object
+      properties:
+        bookId: {type: integer}
+        title: {type: string}
+        quantity: {type: integer}
+        unitPriceCents: {type: integer}
+    PurchaseAttributes:
+      type: object
+      properties:
+        createdAt: {type: string, format: date-time}
+        totalCents: {type: integer}
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseLine'
+    PurchaseResource:
+      type: object
+      properties:
+        type: {type: string, enum: [purchases]}
+        id: {type: string}
+        attributes:
+          $ref: '#/components/schemas/PurchaseAttributes'
+        links:
+          $ref: '#/components/schemas/Links'
+    PurchaseDocument:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PurchaseResource'
+    PurchaseCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseResource'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'
+    PurchaseCreateDocument:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [type, attributes]
+          properties:
+            type: {type: string, enum: [purchases]}
+            attributes:
+              type: object
+              required: [lines]
+              properties:
+                lines:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+                    required: [bookId, quantity]
+                    properties:
+                      bookId: {type: integer, minimum: 1}
+                      quantity: {type: integer, minimum: 1}
+  responses:
+    BadRequest:
+      description: Invalid query parameter or malformed body.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'
+    Unauthorized:
+      description: Missing, malformed or unknown Customer-Id.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'
+    NotFound:
+      description: Unknown, unpublished (books) or another customer's resource.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'
+    Conflict:
+      description: Id or type mismatch, or insufficient stock.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'
+    UnsupportedMediaType:
+      description: Content-Type is not application/vnd.api+json.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'
+    UnprocessableEntity:
+      description: Validation errors, one error object per invalid field.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'
+    PaymentDeclined:
+      description: The payment service declined the payment.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'
+    BadGateway:
+      description: The payment service is unreachable or failed.
+      content:
+        application/vnd.api+json:
+          schema:
+            $ref: '#/components/schemas/ErrorDocument'

@@ -1,0 +1,21 @@
+{
+	admin off
+}
+
+:8089 {
+	resource {
+		dir resources
+		dsn {$DATABASE_URL:postgres://llmapi:llmapi@127.0.0.1:54329/llmapi_v2}
+		formats json csv
+		envelope {
+			items items
+			total total
+			page page
+			itemsPerPage itemsPerPage
+			pages pages
+		}
+		errors {
+			error message
+		}
+	}
+}

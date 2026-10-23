@@ -1,0 +1,18 @@
+{
+  "num_turns": 16,
+  "total_cost_usd": 0.2273819,
+  "usage": {
+    "input_tokens": 32,
+    "output_tokens": 5470,
+    "cache_read_input_tokens": 524619,
+    "cache_creation_input_tokens": 30039
+  },
+  "wall_seconds": 63,
+  "authored_loc": 58,
+  "authored_files": 9,
+  "scaffold_files_modified": 0,
+  "scaffold_command": null,
+  "tool_written_loc": 0,
+  "repo_loc": 49,
+  "repo_loc_tool": "scc"
+}

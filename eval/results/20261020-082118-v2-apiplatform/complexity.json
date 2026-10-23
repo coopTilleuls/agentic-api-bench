@@ -1,0 +1,36 @@
+{
+  "imperative_files": 20,
+  "parse_failures": [],
+  "cc_total": 147,
+  "cc_max_file": 29,
+  "mi_avg": 80.82,
+  "mi_files": 16,
+  "lloc": 233,
+  "functions": 50,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 8,
+  "config_leaves": 9,
+  "config_files": 5,
+  "config_failures": [],
+  "sql_statements": 15,
+  "sql_joins": 5,
+  "sql_subqueries": 0,
+  "sql_where_predicates": 16,
+  "sql_tokens": 411,
+  "qb_calls": 23,
+  "sql_files": [
+    {
+      "file": "src/Bookshop/Catalog.php",
+      "statements": 6,
+      "qb_calls": 23
+    },
+    {
+      "file": "src/Bookshop/Purchases.php",
+      "statements": 9,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "apiplatform",
+  "ast_metrics": "0.43.1"
+}

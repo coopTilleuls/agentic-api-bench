@@ -1,0 +1,690 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/coopTilleuls/agentic-api-bench/resource.schema.json",
+  "title": "Resource definition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "properties"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]*$",
+      "description": "Resource name, used as JSON-LD @type, in /contexts/<name> and in tool names.",
+      "x-hint": "PascalCase letters and digits, singular, e.g. \"Book\" or \"BookReview\"."
+    },
+    "path": {
+      "type": "string",
+      "pattern": "^(/[a-z0-9][a-z0-9_-]*)+$",
+      "description": "Collection path. Items are served at <path>/<identifier>. Required unless the definition declares operations.",
+      "x-hint": "Lowercase, starts with a slash, no trailing slash, e.g. \"/books\" or \"/book-reviews\"."
+    },
+    "description": {
+      "type": "string",
+      "description": "Free text, shown in OpenAPI."
+    },
+    "table": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?$",
+      "description": "Table (or schema.table) backing the resource. Alone, reads the declared properties from it. With query, it is metadata only: the query reads, while ctx.resource() helpers, relations and generated writes use the table.",
+      "x-hint": "A table name such as \"book\" or \"public.book\"."
+    },
+    "query": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(\\.query\\.(ts|js)|\\.(star|py))$",
+      "description": "Script building the rows, in the definitions directory: TypeScript named <name>.query.ts, or Starlark (Python syntax) named <name>.star or <name>.py. Each property must be a column returned by the query. May be combined with table (the table then only describes the resource).",
+      "x-hint": "A file name in the same directory, no directory part: \"book.query.ts\" (TypeScript) or \"book.star\" / \"book.py\" (Starlark)."
+    },
+    "command": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(\\.command\\.(ts|js)|\\.(star|py))$",
+      "description": "Script performing writes, in the definitions directory: TypeScript named <name>.command.ts, or Starlark named <name>.star / <name>.py. It defines create, update and/or remove functions. Replaces the generated INSERT/UPDATE/DELETE of a table resource; required to make a query resource writable.",
+      "x-hint": "A file name in the same directory, no directory part: \"book.command.ts\" (TypeScript) or \"book_command.star\" (Starlark)."
+    },
+    "input": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Input DTO: the request body accepted by writes (POST/PUT/PATCH), validated before the command runs. Keys are body keys. Default for table resources: the properties that are not readOnly.",
+      "propertyNames": {
+        "pattern": "^[^.\\[\\]\\s\\p{Z}\\p{C}]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/inputProperty"
+      },
+      "x-hint": "Input field names use letters, digits and underscores."
+    },
+    "readOnly": {
+      "type": "boolean",
+      "description": "Disable POST/PUT/PATCH/DELETE on this resource."
+    },
+    "relations": {
+      "type": "object",
+      "description": "Links to other resources, used by ctx.resource() helpers (join, relation) and to name nested columns. To-one: {\"resource\": \"Author\", \"column\": \"author_id\"} (the column of this table holding the related identifier). To-many: {\"resource\": \"Book\", \"foreignKey\": \"author_id\", \"many\": true} (the column of the related table pointing back here).",
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/relation"
+      },
+      "x-hint": "Relation names use letters, digits and underscores, usually the property they fill (\"author\", \"books\")."
+    },
+    "parameters": {
+      "type": "object",
+      "description": "HTTP query and header parameters that change the response: built-in filters, ordering, pagination, or a handler script. Parsed and validated (type, min, max, enum, required) before anything runs; a failure answers 400, or the declared status. Undeclared query parameters are ignored.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/parameter"
+      },
+      "x-hint": "The key is the query parameter name (order filter: the prefix of order[<property>]) or the header name."
+    },
+    "order": {
+      "type": "object",
+      "description": "Default collection order when no order parameter is sent, e.g. {\"createdAt\": \"desc\"}. Keys are properties, in priority order; the identifier is always added last as a tiebreak.",
+      "additionalProperties": {
+        "enum": [
+          "asc",
+          "desc"
+        ],
+        "x-hint": "asc or desc."
+      },
+      "x-hint": "An object of property name to \"asc\" or \"desc\"."
+    },
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Wrap JSON (format json) collections in an object instead of a bare array. Each key names the output field of that value; omitted keys are not output. Overrides the Caddyfile envelope.",
+      "properties": {
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "total": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "page": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "itemsPerPage": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "pages": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        }
+      },
+      "x-hint": "e.g. {\"items\": \"items\", \"total\": \"total\", \"page\": \"page\", \"itemsPerPage\": \"itemsPerPage\", \"pages\": \"pages\"}."
+    },
+    "errors": {
+      "description": "Error response shape: \"problem\" (application/problem+json, default) or an object mapping output fields to error fields, e.g. {\"error\": \"message\"}. Overrides the Caddyfile errors option. Definition errors are always problem+json.",
+      "oneOf": [
+        {
+          "const": "problem"
+        },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "enum": [
+              "message",
+              "code",
+              "status",
+              "pointer",
+              "hint",
+              "resource"
+            ]
+          }
+        }
+      ],
+      "x-hint": "\"problem\", or an object such as {\"error\": \"message\"} whose values are among message, code, status, pointer, hint, resource."
+    },
+    "errorDetails": {
+      "type": "boolean",
+      "description": "With an errors object shape: true (default) also outputs code, hint, pointer and errors (several input errors) as extra keys; false outputs only the declared keys. Overrides the Caddyfile error_details option."
+    },
+    "unknownInput": {
+      "enum": [
+        "reject",
+        "ignore"
+      ],
+      "description": "What writes do with body keys that are not in input: reject (422 unknown_property, default) or ignore.",
+      "x-hint": "reject or ignore."
+    },
+    "formats": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "jsonld",
+          "json",
+          "csv"
+        ],
+        "x-hint": "One of: jsonld, json, csv."
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Output formats this resource accepts in Accept / ?format= / path suffix. Default: all of jsonld, json, csv.",
+      "x-hint": "A list among \"jsonld\", \"json\", \"csv\"."
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Dedicated endpoints replacing the default CRUD operations. Each has its own method, path, pinned format and optionally its own query/command; properties describe their rows.",
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    },
+    "allow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Capabilities granted to the query and command scripts.",
+      "properties": {
+        "fetch": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9.-]+(:[0-9]+)?$"
+          },
+          "description": "Hosts ctx.fetch may call, as host or host:port (\"api.example.com\", \"127.0.0.1:9000\").",
+          "x-hint": "A host name, optionally with :port, without scheme or path."
+        },
+        "env": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "description": "Environment variables ctx.env may read.",
+          "x-hint": "An environment variable name such as API_TOKEN."
+        }
+      }
+    },
+    "itemsPerPage": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "default": 30,
+      "description": "Default page size of collections (the itemsPerPage pagination parameter lets clients change it).",
+      "x-hint": "An integer between 1 and 1000."
+    },
+    "properties": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Exposed fields, in output order. Keys are both the JSON field names and the column names.",
+      "propertyNames": {
+        "pattern": "^[^.\\[\\]\\s\\p{Z}\\p{C}]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/property"
+      },
+      "x-hint": "Property names use letters, digits and underscores and must equal a column name."
+    }
+  },
+  "$defs": {
+    "property": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "datetime",
+            "object",
+            "array"
+          ],
+          "description": "JSON output type. date is YYYY-MM-DD, datetime an RFC 3339 string in UTC. object needs properties, array needs items.",
+          "x-hint": "One of: string, integer, number, boolean, date, datetime, object, array."
+        },
+        "identifier": {
+          "type": "boolean",
+          "description": "Exactly one property must be the identifier (type integer or string). It builds the item IRI <path>/<value> and orders collections."
+        },
+        "filterable": {
+          "type": "boolean",
+          "description": "Allow exact-match filtering with ?<property>=<value> on the collection."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Must be present in the body of POST and PUT."
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Output only: rejected in request bodies (computed or joined columns)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Free text, shown in OpenAPI."
+        },
+        "column": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "description": "Column of table holding this property, when it differs from the property name (price_cents for priceCents). Used by table reads, generated writes and ctx.resource() helpers.",
+          "x-hint": "A column name of the table."
+        },
+        "computed": {
+          "type": "boolean",
+          "description": "Not a column of table: the query computes it. ctx.resource().columns() skips it."
+        },
+        "properties": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Nested properties of an object property, in output order. Filled from a json column of the same name, or from columns named <property>_<nested>.",
+          "propertyNames": {
+            "pattern": "^[^.\\[\\]\\s\\p{Z}\\p{C}]+$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/property"
+          }
+        },
+        "items": {
+          "$ref": "#/$defs/property",
+          "description": "Shape of the elements of an array property (filled from a json column, e.g. json_agg)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "object"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "properties"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "array"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "items"
+            ]
+          }
+        }
+      ]
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "path"
+      ],
+      "properties": {
+        "method": {
+          "if": {
+            "type": "array"
+          },
+          "else": {
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          },
+          "items": {
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "x-hint": "One of: GET, POST, PUT, PATCH, DELETE (upper case), or a non-empty array of distinct methods served by one handler, e.g. [\"GET\", \"POST\"]."
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(/[a-z0-9][a-z0-9_.-]*)+(/\\{[A-Za-z_][A-Za-z0-9_]*\\})?(/[a-z0-9][a-z0-9_.-]*)*$",
+          "description": "Full path of the endpoint.",
+          "x-hint": "Lowercase, starts with a slash, no trailing slash, e.g. \"/business/export\"; an item operation holds /{<identifier>} once, at the end or before more segments, e.g. \"/authors/{id}\" or \"/purchases/{id}/refund\"."
+        },
+        "format": {
+          "enum": [
+            "jsonld",
+            "json",
+            "csv"
+          ],
+          "description": "Pinned output format: Accept is ignored. Default jsonld.",
+          "x-hint": "One of: jsonld, json, csv."
+        },
+        "query": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+(\\.query\\.(ts|js)|\\.(star|py))$",
+          "description": "Query script of this operation (GET). Defaults to the definition's query or table.",
+          "x-hint": "A file name in the same directory, no directory part: \"book.query.ts\" (TypeScript) or \"book.star\" / \"book.py\" (Starlark)."
+        },
+        "command": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+(\\.command\\.(ts|js)|\\.(star|py))$",
+          "description": "Command script of this operation (POST/PUT/PATCH/DELETE); the function called is create (POST), update (PUT/PATCH) or remove (DELETE). Defaults to the definition's command.",
+          "x-hint": "A file name in the same directory, no directory part: \"book.command.ts\" (TypeScript) or \"book_command.star\" (Starlark)."
+        },
+        "description": {
+          "type": "string"
+        },
+        "input": {
+          "type": "object",
+          "description": "Input DTO of this operation; defaults to the definition's input. An empty object ({}) means the operation takes no body: one sent is ignored.",
+          "propertyNames": {
+            "pattern": "^[^.\\[\\]\\s\\p{Z}\\p{C}]+$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/inputProperty"
+          },
+          "x-hint": "Input field names use letters, digits and underscores."
+        },
+        "output": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Properties output by this operation, in order, when it differs from the resource's properties (list vs item)."
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Parameters of this operation, added to (and overriding by name) the definition's.",
+          "propertyNames": {
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/parameter"
+          }
+        },
+        "order": {
+          "type": "object",
+          "description": "Default collection order when no order parameter is sent, e.g. {\"createdAt\": \"desc\"}. Keys are properties, in priority order; the identifier is always added last as a tiebreak.",
+          "additionalProperties": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "x-hint": "asc or desc."
+          },
+          "x-hint": "An object of property name to \"asc\" or \"desc\"."
+        }
+      }
+    },
+    "inputProperty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "datetime",
+            "object",
+            "array"
+          ],
+          "x-hint": "One of: string, integer, number, boolean, date, datetime, object, array."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Must be present in the body of POST and PUT."
+        },
+        "description": {
+          "type": "string"
+        },
+        "nullable": {
+          "type": "boolean",
+          "description": "false rejects null (default true)."
+        },
+        "min": {
+          "type": "number",
+          "description": "Minimum value (integer, number)."
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum value (integer, number)."
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum length (string)."
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum length (string)."
+        },
+        "minItems": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum number of elements (array)."
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of elements (array)."
+        },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Allowed values."
+        },
+        "column": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "description": "Column written by generated INSERT/UPDATE; defaults to the column of the property of the same name, else the input name."
+        },
+        "properties": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Fields of an object input, validated recursively (errors point at /field/nested).",
+          "propertyNames": {
+            "pattern": "^[^.\\[\\]\\s\\p{Z}\\p{C}]+$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/inputProperty"
+          }
+        },
+        "items": {
+          "$ref": "#/$defs/inputProperty",
+          "description": "Shape of the elements of an array input (errors point at /field/<index>/...)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "object"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "properties"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "array"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "items"
+            ]
+          }
+        }
+      ]
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource"
+      ],
+      "properties": {
+        "resource": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z0-9]*$",
+          "description": "Name of the related resource; it must declare table.",
+          "x-hint": "The name of another definition, e.g. \"Author\"."
+        },
+        "column": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "description": "To-one: column of this resource's table holding the related identifier."
+        },
+        "foreignKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+          "description": "To-many: column of the related table holding this resource's identifier."
+        },
+        "many": {
+          "type": "boolean",
+          "description": "true for a to-many relation (needs foreignKey)."
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "in"
+      ],
+      "properties": {
+        "in": {
+          "enum": [
+            "query",
+            "header"
+          ],
+          "description": "Where the value is read: query string or request header.",
+          "x-hint": "query or header."
+        },
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "datetime"
+          ],
+          "description": "Type the value is parsed to. Default: the type of the filtered property, else string.",
+          "x-hint": "One of: string, integer, number, boolean, date, datetime."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Missing value answers the error status."
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599,
+          "description": "HTTP status of a missing or invalid value (and default status of ctx.reject in the handler). Default 400. Parameters with a status are checked first."
+        },
+        "filter": {
+          "enum": [
+            "exact",
+            "partial",
+            "ipartial",
+            "range",
+            "date",
+            "boolean",
+            "order"
+          ],
+          "description": "Built-in filter applied to collection reads.",
+          "x-hint": "One of: exact, partial, ipartial, range, date, boolean, order."
+        },
+        "property": {
+          "type": "string",
+          "pattern": "^[^.\\[\\]\\s\\p{Z}\\p{C}]+(\\.[^.\\[\\]\\s\\p{Z}\\p{C}]+)?$",
+          "description": "Property filtered, default the parameter name; may follow an object property (author.name).",
+          "x-hint": "A property name, or <objectProperty>.<nested> such as author.name."
+        },
+        "properties": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "order filter: the properties a client may sort on."
+        },
+        "pagination": {
+          "enum": [
+            "page",
+            "itemsPerPage"
+          ],
+          "description": "Makes this parameter the page number or the client-chosen page size."
+        },
+        "handler": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+(\\.handler\\.(ts|js)|\\.(star|py))$",
+          "description": "Script called with (value, ctx) when the value is present: returns a SQL condition, null, or calls ctx.reject; may ctx.set(name, value) for the query.",
+          "x-hint": "A file name in the same directory: \"in_stock.handler.ts\" or \"in_stock.star\"."
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

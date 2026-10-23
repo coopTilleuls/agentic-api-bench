@@ -1,0 +1,33 @@
+{
+  "imperative_files": 23,
+  "parse_failures": [],
+  "cc_total": 217,
+  "cc_max_file": 39,
+  "mi_avg": 83.24,
+  "mi_files": 18,
+  "lloc": 401,
+  "functions": 81,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 13,
+  "config_leaves": 12,
+  "config_files": 3,
+  "config_failures": [
+    "config/services.yaml: yaml: unmarshal errors:"
+  ],
+  "sql_statements": 17,
+  "sql_joins": 5,
+  "sql_subqueries": 1,
+  "sql_where_predicates": 17,
+  "sql_tokens": 428,
+  "qb_calls": 0,
+  "sql_files": [
+    {
+      "file": "src/Repository/BookshopRepository.php",
+      "statements": 17,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "apiplatform",
+  "ast_metrics": "0.43.1"
+}

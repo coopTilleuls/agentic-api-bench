@@ -1,0 +1,8 @@
+# The OpenAPI document of the API, at the URL the API is specified with.
+openapi_json:
+    path: /openapi.json
+    controller: api_platform.action.documentation
+    defaults:
+        _api_respond: true
+        _format: jsonopenapi
+    methods: [GET]

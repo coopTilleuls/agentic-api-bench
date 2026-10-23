@@ -1,0 +1,37 @@
+# Formats, envelope, error bodies
+
+Collection `GET /books?page=2`, JSON-LD/Hydra (default):
+
+```json
+{"@context": "/contexts/Book", "@id": "/books", "@type": "Collection", "totalItems": 12,
+ "member": [{"@id": "/books/11", "@type": "Book", "id": 11, "title": "Dune"}],
+ "view": {"@id": "/books?page=2", "@type": "PartialCollectionView", "first": "/books?page=1", "last": "/books?page=2", "previous": "/books?page=1"},
+ "search": {"@type": "IriTemplate", "template": "/books{?author}", "mapping": [...]}}
+```
+
+`view` appears with several pages or an applied parameter; `search` lists the declared query parameters. An item is the member object plus `@context`.
+
+Format choice, in order: path suffix (`/books.csv`, `/books/7.json`, `.jsonld`), `?format=jsonld|json|csv`, `Accept` (first supported; none or `*/*`: first allowed). A format outside the resource's `formats` is `406 not_acceptable`, unless a script answers (`scripts`).
+
+- `jsonld` (default), `application/ld+json` — JSON-LD object / Hydra collection.
+- `json`, `application/json` — properties only / bare array, or the `envelope` object.
+- `csv`, `text/csv` — header + row / header (property names, declaration order) + **every matching row** (filters apply, no pagination unless `?page=N`), streamed, NULL empty, `Content-Disposition: attachment; filename="<path>.csv"`.
+
+## Caddyfile options
+
+A definition overrides them with `formats`, `envelope`, `errors`, `errorDetails`.
+
+- `formats` — default `jsonld json csv`; first = default (`formats json csv` for a plain JSON API).
+- `envelope { ... }` — wraps `json` lists, each line maps a value (`items`, `total`, `page`, `itemsPerPage`, `pages`) to its output key, omitted values are not output; `pages` = `ceil(total / itemsPerPage)`, `0` when empty. Without it a JSON list is a bare array.
+- `errors problem` or `errors { ... }` — default `problem` (`application/problem+json`), or lines mapping an output key to `message`, `code`, `status`, `pointer`, `hint` or `resource`.
+- `error_details on|off` — default `on`; `off` drops the teaching keys, leaving only the `errors { }` keys.
+
+Block lines: `envelope { items items }`, `errors { error message }`.
+
+## Error bodies
+
+```json
+{"type": "/errors/422", "title": "An error occurred", "status": 422, "detail": "\"titel\" is not a property of Book", "code": "unknown_property", "hint": "Did you mean \"title\"? ... see: caddy resource guide commands", "resource": "Book", "pointer": "/titel"}
+```
+
+Several input errors: the first at top level, all in `errors` (`code`, `pointer`, `message`, `hint`). With `errors { error message }` the body is `{"error": "<message>"}` (several: messages joined, each prefixed by its pointer), `application/json`, then `code`, `hint`, `pointer` (`errors`) unless `error_details off`. It applies to every runtime error (4xx/5xx); an invalid definition's paths stay problem+json. A framework `hint` ends with `see: caddy resource guide <topic>`; a `ctx.reject` hint is yours. Unknown paths: `404 not_found` listing available paths (and definitions with errors); `invalid_body` is a body that is not one JSON object.

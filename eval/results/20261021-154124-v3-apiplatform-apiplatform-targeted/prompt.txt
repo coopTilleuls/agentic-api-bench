@@ -1,0 +1,79 @@
+# Bookshop API
+
+Build an HTTP API for a bookshop. The data already exists in a PostgreSQL database (connection details are given below). You must not change the database structure.
+
+The API is served on `http://localhost:8089` and must start with `./start.sh`, run from this directory, without any argument. It is stopped by killing that process.
+
+The API follows the JSON:API 1.1 specification (https://jsonapi.org/format/1.1/) and describes itself with an OpenAPI document.
+
+## Data
+
+- `author` (`id`, `name`): `name` may be NULL for anonymous authors.
+- `book` (`id`, `title`, `author_id`, `published`, `price_cents`, `published_at`, `stock`): `published` is true when the book is publicly released; `price_cents` is an integer; `published_at` is a date, NULL for unpublished books; `stock` is the number of copies available.
+- `customer` (`id`, `name`, `email`).
+- `purchase` (`id`, `customer_id`, `created_at`, `total_cents`).
+- `purchase_line` (`id`, `purchase_id`, `book_id`, `quantity`, `unit_price_cents`).
+
+## Format
+
+Every response except the CSV report and `204` is a JSON:API document served as `application/vnd.api+json`; the client sends `Accept: application/vnd.api+json`.
+
+- Resource types are `books`, `authors` and `purchases`. Every resource object has `type`, `id` (the database id, as a string), `attributes`, and a `links.self` link to its own URL (`/books/4`). Attribute names are camelCase as given below. Extra attributes, links and meta are allowed.
+- A list is a document whose `data` is the array of resource objects of the current page, with `links` `first`, `last`, `prev` and `next` (URLs keeping every filter, sort and page size parameter of the request; `prev` absent or null on the first page, `next` absent or null on the last one) and a `meta` object holding the total number of matching items across all pages under a key of your choice.
+- Relationships use JSON:API relationship objects with resource linkage (`{"data": {"type": "authors", "id": "2"}}`). `?include=` returns the related resources in `included` (compound document); without it, `included` is absent or empty.
+- Errors are JSON:API error documents: `{"errors": [...]}`, each error object with `status` (the HTTP status, as a string), `title` and `detail`. Validation errors on the request body answer 422 with one error object per invalid field, `source.pointer` pointing at it (`/data/attributes/priceCents`). Errors on a query parameter answer 400 with `source.parameter` naming it (`sort`, `page[size]`, `filter[minPrice]`).
+- A request with an invalid parameter (unknown sort field, malformed number, boolean or date, unknown `include` path) answers 400. Unknown `filter[...]` keys and unknown query parameters that are not JSON:API families are ignored. A malformed id in a path (`/books/abc`) answers 404.
+- Dates are `YYYY-MM-DD`, timestamps ISO 8601 in UTC, amounts integers in cents.
+
+Pagination uses `page[number]` (from 1) and `page[size]`. Unless stated otherwise a list has 10 items per page; `page[size]` may be 1 to 50 (anything else answers 400). A page past the last one answers 200 with an empty `data`.
+
+## OpenAPI
+
+`GET /openapi.json` serves an OpenAPI 3.0 or 3.1 document describing every operation below: its path, its parameters (path, query including every filter, sort, include and pagination parameter, and the `Customer-Id` header), its request body schema, and its responses with their status codes and schemas.
+
+## Authors
+
+- `GET /authors`: all authors, `id` order, attributes `name` and `publishedBooks` (the number of their published books).
+- `GET /authors/{id}`: one author with the same attributes and a `books` relationship, the list of their published books in `id` order. `?include=books` adds those books to `included`. Unknown author: 404.
+
+## Books
+
+Only published books are visible: unpublished ones are absent from lists and answer 404 everywhere below except `PATCH`.
+
+- `GET /books`: attributes `title`, `priceCents`, `publishedAt` and `stock`, and an `author` relationship. `?include=author` adds the authors to `included` (attribute `name`, null for an anonymous author).
+- Filters, combinable with each other and with pagination, sorting and include:
+  - `filter[title]=dune`: title contains the text, case-insensitive;
+  - `filter[author]=Frank%20Herbert`: author name, exact;
+  - `filter[minPrice]=1000`, `filter[maxPrice]=2000`: price range in cents, bounds included;
+  - `filter[publishedAfter]=2020-01-01`, `filter[publishedBefore]=2020-12-31`: publication date range, bounds included;
+  - `filter[inStock]=true`: only books with `stock` greater than 0; `filter[inStock]=false`: only books with `stock` 0.
+- Sorting: `sort` with the fields `priceCents`, `title` and `publishedAt`, comma separated, ascending unless prefixed with `-`, applied in the order given, ties broken by `id` ascending (`sort=-priceCents,title`). Default: `id` ascending.
+- `GET /books/{id}`: one book, same shape, `?include=author` supported.
+- `PATCH /books/{id}` with a JSON:API document `{"data": {"type": "books", "id": "4", "attributes": {...}}}` (`Content-Type: application/vnd.api+json`; any other content type answers 415): partial update of `title`, `priceCents` and `stock`, only the attributes sent change. Works on unpublished books too. A `data.id` other than the one in the path answers 409. `priceCents` or `stock` below 0 or not an integer, or a `title` that is null or empty, answers 422 and changes nothing. Unknown attributes are ignored. The response is the book document, or 204 if it is unpublished.
+
+## Purchases
+
+Customers identify themselves with the `Customer-Id` header. Without it, or with an unknown or malformed customer id, every request below answers 401, checked before anything else. A customer only ever sees their own purchases: another customer's purchase answers 404.
+
+- `GET /purchases`: the customer's purchases, most recent first, attributes `createdAt`, `totalCents` and `lines`, each line `{"bookId", "title", "quantity", "unitPriceCents"}` (`bookId` a number).
+- `GET /purchases/{id}`: one purchase, same shape.
+- `POST /purchases` (`Content-Type: application/vnd.api+json`) with `{"data": {"type": "purchases", "attributes": {"lines": [{"bookId": 1, "quantity": 2}, ...]}}}` buys books:
+  - `lines` must not be empty, and every line must reference a published book with an integer quantity of at least 1, otherwise 422 (`source.pointer` `/data/attributes/lines` or below it);
+  - every book must have enough stock for the total quantity asked across all lines, otherwise 409;
+  - the unit price is the book's current price, the total is the sum of the lines;
+  - the payment service (below) must accept the payment: declined answers 402; unreachable, failing or any other answer gives 502;
+  - on success the purchase and its lines are stored, the stock of each book decreases by the quantity bought, and the answer is 201 with the purchase document and a `Location` header holding its URL;
+  - on any failure, nothing is stored and no stock changes.
+
+## Payment service
+
+An external service, already running, accepts or declines payments: `POST http://127.0.0.1:18090/payments` with `{"customerId": <id>, "amountCents": <total>}` answers `{"status": "accepted"}` or `{"status": "declined"}`.
+
+## Sales report
+
+- `GET /reports/sales?from=2026-01-01&to=2026-01-31` downloads a CSV file (`text/csv`, RFC 4180) of the books sold between those dates (purchase `created_at`, bounds included, whole days in UTC). Columns, in this order: `title`, `quantity`, `revenueCents`. One line per book sold in that period, sorted by `revenueCents` descending, then `title`, then book id, with a header line, also when no book was sold. `from` and `to` are required: missing, malformed, or `from` after `to` answers 400 (a JSON:API error document). The report is public and covers all customers.
+
+---
+
+Build it with API Platform on Symfony. PHP 8.4, Composer and the Symfony CLI are available and Packagist is reachable. The project is already created in this directory with API Platform installed. PostgreSQL DSN: postgres://eval_rw:eval_rw@postgres:5432/llmapi_eval
+Work in this directory. When you are done, leave the API stopped; it will be started with ./start.sh from this directory and tested over HTTP.

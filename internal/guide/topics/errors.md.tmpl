@@ -1,0 +1,25 @@
+# Errors and validation
+
+`caddy resource validate` prints `{"valid", "errors": [...], "warnings": [...]}` (exit 1 when invalid). An error is `code`, `resource` (definition name), `pointer` (JSON pointer into it), `message`, `hint`; the `hint` says how to fix it and ends with `see: caddy resource guide <topic>`. Warnings (`deprecated_header_prefix`) do not invalidate: the definition is served.
+
+```json
+{"code": "unknown_column", "resource": "Book", "pointer": "/properties/author", "message": "column \"author\" is not returned by the query", "hint": "Query returns: id, title, author_name. Alias the column in the SELECT (expr AS author) or rename the property. see: caddy resource guide queries"}
+```
+
+Checks in order: JSON syntax/TypeScript compilation, schema, identifier, `table`/`query`, script files and exports, parameters (filter vs property type, sortable properties), relations, operation paths and outputs; then, with a dsn: the table exists, the query runs (empty request), every property is a returned column (or `<object>_<nested>` columns, or row key), column types match. Fix errors in order.
+
+## Request-time codes
+
+By HTTP status; the response `hint` names the fix (bodies: `formats`):
+{{range .ByStatus}}
+- {{.Label}}: {{.Codes}}
+{{- end}}
+
+## Definition and script codes
+
+HTTP 500 (an invalid definition's paths answer them), by the topic that explains them:
+{{range .ByTopic}}
+- `{{.Label}}`: {{.Codes}}
+{{- end}}
+
+`ctx.reject({code})` codes are yours and not listed.

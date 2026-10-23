@@ -1,0 +1,10 @@
+{
+  "name": "Author",
+  "path": "/authors",
+  "table": "author",
+  "itemsPerPage": 2,
+  "properties": {
+    "id": {"type": "integer", "identifier": true, "readOnly": true},
+    "name": {"type": "string", "required": true, "filterable": true}
+  }
+}

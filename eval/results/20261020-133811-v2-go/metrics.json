@@ -1,0 +1,70 @@
+{
+  "task": "build",
+  "num_turns": 18,
+  "total_cost_usd": 0.044503259999999996,
+  "usage": {
+    "input_tokens": 36,
+    "output_tokens": 46653,
+    "cache_read_input_tokens": 930236,
+    "cache_creation_input_tokens": 59354
+  },
+  "wall_seconds": 238,
+  "project_root": ".",
+  "authored_loc": 950,
+  "authored_files": 8,
+  "scaffold_files_modified": 1,
+  "scaffold_command": "go mod init bookshop >/dev/null 2>",
+  "tool_written_loc": 933,
+  "repo_loc": 939,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": null,
+  "changed_lines_added": null,
+  "changed_lines_removed": null,
+  "files_touched": null,
+  "complexity": {
+    "imperative_files": 6,
+    "parse_failures": [],
+    "cc_total": 166,
+    "cc_max_file": 65,
+    "mi_avg": 45.45,
+    "mi_files": 6,
+    "lloc": 485,
+    "functions": 28,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 0,
+    "config_leaves": 0,
+    "config_files": 0,
+    "config_failures": [],
+    "sql_statements": 17,
+    "sql_joins": 5,
+    "sql_subqueries": 2,
+    "sql_where_predicates": 17,
+    "sql_tokens": 435,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "authors.go",
+        "statements": 4,
+        "qb_calls": 0
+      },
+      {
+        "file": "books.go",
+        "statements": 3,
+        "qb_calls": 0
+      },
+      {
+        "file": "purchases.go",
+        "statements": 9,
+        "qb_calls": 0
+      },
+      {
+        "file": "report.go",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "go",
+    "ast_metrics": "0.43.1"
+  }
+}

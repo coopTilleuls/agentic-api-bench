@@ -1,0 +1,2 @@
+init event clean: {"model":"claude-haiku-5-5","cwd":"/work","plugins":["cc-plugin-sec-default@builtin"],"memory_paths":{"auto":"/home/agent/.claude/projects/-work/memory/"},"mcp_servers":[],"skills":[],"claude_code_version":"2.1.296"}
+result: success, turns 54, cost $0.31649915999999995

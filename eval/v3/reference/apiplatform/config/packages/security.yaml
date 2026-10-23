@@ -1,0 +1,16 @@
+security:
+    providers:
+        customers:
+            entity:
+                class: App\Entity\Customer
+                property: id
+
+    firewalls:
+        purchases:
+            pattern: ^/purchases
+            stateless: true
+            provider: customers
+            custom_authenticators:
+                - App\Security\CustomerIdAuthenticator
+        main:
+            security: false

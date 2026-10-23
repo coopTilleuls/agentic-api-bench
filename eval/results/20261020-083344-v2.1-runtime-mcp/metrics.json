@@ -1,0 +1,90 @@
+{
+  "task": "evolve",
+  "num_turns": 27,
+  "total_cost_usd": 0.02328346,
+  "usage": {
+    "input_tokens": 28,
+    "output_tokens": 16222,
+    "cache_read_input_tokens": 650486,
+    "cache_creation_input_tokens": 43324
+  },
+  "wall_seconds": 84,
+  "project_root": ".",
+  "authored_loc": 283,
+  "authored_files": 18,
+  "scaffold_files_modified": 0,
+  "scaffold_command": null,
+  "tool_written_loc": 139,
+  "repo_loc": 260,
+  "repo_loc_tool": "scc",
+  "framework_bypassed": false,
+  "changed_lines_added": 51,
+  "changed_lines_removed": 3,
+  "files_touched": 10,
+  "complexity": {
+    "imperative_files": 11,
+    "parse_failures": [],
+    "cc_total": 40,
+    "cc_max_file": 18,
+    "mi_avg": 76.91,
+    "mi_files": 11,
+    "lloc": 59,
+    "functions": 13,
+    "ast_metrics_network": "unshare",
+    "modified_whole": [],
+    "config_keys": 238,
+    "config_leaves": 161,
+    "config_files": 5,
+    "config_failures": [],
+    "sql_statements": 16,
+    "sql_joins": 4,
+    "sql_subqueries": 3,
+    "sql_where_predicates": 20,
+    "sql_tokens": 513,
+    "qb_calls": 0,
+    "sql_files": [
+      {
+        "file": "resources/author.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/book.command.ts",
+        "statements": 3,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/book.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/customer.handler.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/purchase.command.ts",
+        "statements": 4,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/purchase.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/refund.command.ts",
+        "statements": 4,
+        "qb_calls": 0
+      },
+      {
+        "file": "resources/sales_report.query.ts",
+        "statements": 1,
+        "qb_calls": 0
+      }
+    ],
+    "stack": "runtime",
+    "ast_metrics": "0.43.1"
+  }
+}

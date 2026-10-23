@@ -1,0 +1,5 @@
+openapi:
+    path: /openapi.json
+    controller: api_platform.action.documentation
+    defaults:
+        _format: jsonopenapi

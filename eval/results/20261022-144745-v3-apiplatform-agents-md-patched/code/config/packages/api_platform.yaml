@@ -1,0 +1,14 @@
+api_platform:
+    title: Bookshop API
+    version: 1.0.0
+    enable_entrypoint: false
+    formats:
+        jsonapi: ['application/vnd.api+json']
+    docs_formats:
+        jsonopenapi: ['application/vnd.openapi+json']
+        json: ['application/json']
+        html: ['text/html']
+    defaults:
+        stateless: true
+    jsonapi:
+        use_iri_as_id: false

@@ -1,0 +1,71 @@
+# Bookshop API
+
+Build an HTTP API for a bookshop. The data already exists in a PostgreSQL database (connection details are given below). You must not change the database structure.
+
+The API is served on `http://localhost:8089` and must start with `./start.sh`, run from this directory, without any argument. It is stopped by killing that process.
+
+## Data
+
+- `author` (`id`, `name`): `name` may be NULL for anonymous authors.
+- `book` (`id`, `title`, `author_id`, `published`, `price_cents`, `published_at`, `stock`): `published` is true when the book is publicly released; `price_cents` is an integer; `published_at` is a date, NULL for unpublished books; `stock` is the number of copies available.
+- `customer` (`id`, `name`, `email`).
+- `purchase` (`id`, `customer_id`, `created_at`, `total_cents`).
+- `purchase_line` (`id`, `purchase_id`, `book_id`, `quantity`, `unit_price_cents`).
+
+## Response format
+
+All responses are JSON unless stated otherwise.
+
+- A list is `{"items": [...], "total": <number of matching items, all pages>, "page": <current page>, "itemsPerPage": <page size>}`.
+- An error is `{"error": "<human readable message>"}` with the status code given below. A request with an invalid parameter (unknown sort field, sort direction other than `asc`/`desc`, malformed number, boolean or date) answers 400. Unknown query parameters are ignored. A malformed id in a path (`/books/abc`) answers 404.
+- Dates are `YYYY-MM-DD`, timestamps ISO 8601 in UTC, amounts integers in cents.
+
+Pages start at 1 (`?page=2`). Unless stated otherwise a list has 10 items per page; the client may ask for another size with `?itemsPerPage=n`, from 1 to 50 (anything else answers 400). A page past the last one answers 200 with an empty `items`.
+
+## Authors
+
+- `GET /authors`: all authors, `id` order, each with `id`, `name` and `publishedBooks` (the number of their published books).
+- `GET /authors/{id}`: one author with `id`, `name` and `books`, the list of their published books as `{"id", "title"}` in `id` order. Unknown author: 404.
+
+## Books
+
+Only published books are visible: unpublished ones are absent from lists and answer 404 everywhere below except `PATCH`.
+
+- `GET /books`: each book has `id`, `title`, `priceCents`, `publishedAt`, `stock` and `author`, the author as `{"id", "name"}`.
+- Filters, combinable with each other and with pagination and sorting:
+  - `?title=dune`: title contains the text, case-insensitive;
+  - `?author=Frank%20Herbert`: author name, exact;
+  - `?priceCents[gte]=1000`, `?priceCents[lte]=2000`: price range, bounds included;
+  - `?publishedAt[after]=2020-01-01`, `?publishedAt[before]=2020-12-31`: publication date range, bounds included;
+  - `?inStock=true`: only books with `stock` greater than 0; `?inStock=false`: only books with `stock` 0.
+- Sorting: `?order[priceCents]=asc|desc`, `?order[title]=asc|desc`, `?order[publishedAt]=asc|desc`, several allowed, applied in the order given, ties broken by `id` ascending. Default: `id` ascending.
+- `GET /books/{id}`: one book, same shape.
+- `PATCH /books/{id}`: partial update of `title`, `priceCents` and `stock`, only the fields sent change. Works on unpublished books too. `priceCents` or `stock` below 0 or not an integer, or a `title` that is null or empty, answers 422 and changes nothing. Unknown fields are ignored. The response is the book in the shape above, or 204 if it is unpublished.
+
+## Purchases
+
+Customers identify themselves with the `X-Customer-Id` header. Without it, or with an unknown or malformed customer id, every request below answers 401, checked before anything else. A customer only ever sees their own purchases: another customer's purchase answers 404.
+
+- `GET /purchases`: the customer's purchases, most recent first, each with `id`, `createdAt`, `totalCents` and `lines`, each line `{"bookId", "title", "quantity", "unitPriceCents"}`.
+- `GET /purchases/{id}`: one purchase, same shape.
+- `POST /purchases` with `{"lines": [{"bookId": 1, "quantity": 2}, ...]}` buys books:
+  - `lines` must not be empty, and every line must reference a published book with an integer quantity of at least 1, otherwise 422;
+  - every book must have enough stock for the total quantity asked across all lines, otherwise 409;
+  - the unit price is the book's current price, the total is the sum of the lines;
+  - the payment service (below) must accept the payment: declined answers 402; unreachable, failing or any other answer gives 502;
+  - on success the purchase and its lines are stored, the stock of each book decreases by the quantity bought, and the answer is 201 with the purchase in the shape above;
+  - on any failure, nothing is stored and no stock changes.
+
+## Payment service
+
+An external service, already running, accepts or declines payments: `POST http://127.0.0.1:18090/payments` with `{"customerId": <id>, "amountCents": <total>}` answers `{"status": "accepted"}` or `{"status": "declined"}`.
+
+## Sales report
+
+- `GET /reports/sales?from=2026-01-01&to=2026-01-31` downloads a CSV file of the books sold between those dates (purchase `created_at`, bounds included, whole days in UTC). Columns, in this order: `title`, `quantity`, `revenueCents`. One line per book sold in that period, sorted by `revenueCents` descending, then `title`, then book id, with a header line. `from` and `to` are required: missing, malformed, or `from` after `to` answers 400. The report is public and covers all customers.
+
+---
+
+The only tool you have is the ./caddy binary in this directory. PostgreSQL DSN: postgres://eval_rw:eval_rw@postgres:5432/llmapi_eval
+Work in this directory. When you are done, leave the API stopped; it will be started with ./start.sh from this directory and tested over HTTP.
+An MCP server for this framework is connected to this session ("caddy-resource"). Once your API runs, it also serves MCP at http://localhost:8089/mcp.

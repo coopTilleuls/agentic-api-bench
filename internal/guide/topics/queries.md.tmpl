@@ -1,0 +1,71 @@
+# Queries
+
+A query script default-exports a function returning SQL built with the `ctx.sql` tagged template (Starlark `def query(ctx):`, `scripts`):
+
+```ts
+export default function query(ctx: QueryContext): Sql {
+  return ctx.sql`SELECT b.id, b.title, a.name AS author FROM book b JOIN author a ON a.id = b.author_id WHERE b.published`;
+}
+```
+
+The server wraps it (`r` is your query):
+
+```sql
+SELECT * FROM (<query>) r WHERE r."author_name" = $1 ORDER BY r."priceCents" DESC, r."id" ASC LIMIT <itemsPerPage> OFFSET <(N-1)*itemsPerPage>
+SELECT count(*) FROM (<query>) r WHERE <same filters>
+SELECT * FROM (<query>) r WHERE r."id" = $1   -- item, write lookup, read-back
+```
+
+- One `SELECT` (or `WITH ... SELECT`; trailing `;` tolerated). No `LIMIT`/`OFFSET`/count/collection `ORDER BY`: use parameters and `order`. Without identifier (dedicated `GET`) and `order`, the query is sent as is (plus `LIMIT`/`OFFSET`) so its `ORDER BY` holds; once a filter applies, the wrapping loses it: declare `order`.
+- One column per property, named exactly like it (`AS`); PostgreSQL folds unquoted names to lower case: `authorName` needs `AS "authorName"`. Extra columns are ignored; duplicate names are `duplicate_column`.
+- Rows your `WHERE` excludes do not exist (collection, item `404`, no update/delete) unless shown in the `lookup` phase (`commands`).
+- Filters and sorting apply to returned columns (`r."<property>"`, `r."<object>_<nested>"`), computed ones too.
+- Request values are strings: cast (`${since}::int`) or `query_failed`. Prefer declared parameters (`ctx.get("since")`) to `ctx.request.query("since")` (raw string or `null`; likewise `ctx.request.header(name)`).
+
+## Nested output
+
+`object`: a json column of its name, or `<property>_<nested>` columns (`author_id`, `author_name`; all NULL is `null`). `array`: a json column, typically `json_agg`:
+
+`(SELECT coalesce(json_agg(json_build_object('id', b.id, 'title', b.title) ORDER BY b.id), '[]') FROM book b WHERE b.author_id = a.id) AS books`
+
+## `ctx.resource(name)` helpers
+
+Needs a `table`; returns injection-safe fragments (identifiers quoted, values bound):
+
+- `table()` — `"book" AS "book"` (a relation helper's alias is `<alias>_<relation>`); `alias()` — the alias string.
+- `column(name)` — `"book"."price_cents"`: a property's `column` or any plain table column.
+- `columns(names?)` — `"book"."price_cents" AS "priceCents", ...`: the given properties, default every scalar non-`computed` one. On a relation helper: aliased `<relation>_<property>`, default the nested properties declared for it.
+- `identifier(value)` — `"book"."id" = $1`.
+- `join(relation)` — join condition with that relation's helper.
+- `relation(name)` — helper of the related resource.
+- `json(names?)` — `json_build_object(...)`, for `json_agg` of a to-many.
+
+```ts
+const book = ctx.resource("Book"), author = book.relation("author");
+return ctx.sql`SELECT ${book.columns()}, ${author.columns()} FROM ${book.table()} JOIN ${author.table()} ON ${book.join("author")} WHERE ${book.column("published")}`;
+```
+
+Unknown resource, property or relation, or no `table`: `invalid_helper_call`.
+
+## Queries that return rows
+
+For non-SQL data (remote API) return rows instead of `ctx.sql`; the server cannot paginate, so honor `ctx.operation`:
+
+- `"collection"`: use `ctx.page` (1-based), `ctx.itemsPerPage`, `ctx.filters` (filterable property to typed value); return `{ items, totalItems }`.
+- `"item"`: return the row whose identifier is `ctx.id`, or `null` (`404`).
+
+Rows carry every property with its declared type (`invalid_row`); any other return is `invalid_query_result`. May be `async`:
+
+```ts
+export default async function query(ctx: QueryContext) {
+  const rows = (await (await ctx.fetch("https://api.example.com/quotes")).json()).map((q) => ({ id: q.id, text: q.body }));
+  if (ctx.operation === "item") return rows.find((r) => r.id === ctx.id) ?? null;
+  const start = (ctx.page - 1) * ctx.itemsPerPage;
+  return { items: rows.slice(start, start + ctx.itemsPerPage), totalItems: rows.length };
+}
+```
+(`allow.fetch` must list the host.)
+
+## During validation
+
+The query runs as a page-1 collection with an empty request: `ctx.validating` is `true`, `query()`/`header()`/`ctx.get` return `null`, `ctx.filters` is empty. SQL is type-checked with `LIMIT 0`; the check stops at the first `ctx.fetch`/`ctx.db.query`/`ctx.db.exec`/`ctx.reject` (rows are then validated per request). Handlers and commands never run.

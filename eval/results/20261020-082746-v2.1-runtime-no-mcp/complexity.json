@@ -1,0 +1,66 @@
+{
+  "imperative_files": 11,
+  "parse_failures": [],
+  "cc_total": 36,
+  "cc_max_file": 14,
+  "mi_avg": 79.2,
+  "mi_files": 11,
+  "lloc": 65,
+  "functions": 11,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 245,
+  "config_leaves": 170,
+  "config_files": 5,
+  "config_failures": [],
+  "sql_statements": 16,
+  "sql_joins": 4,
+  "sql_subqueries": 3,
+  "sql_where_predicates": 23,
+  "sql_tokens": 513,
+  "qb_calls": 0,
+  "sql_files": [
+    {
+      "file": "resources/author.query.ts",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "resources/book.command.ts",
+      "statements": 3,
+      "qb_calls": 0
+    },
+    {
+      "file": "resources/book.query.ts",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "resources/customer.handler.ts",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "resources/purchase.command.ts",
+      "statements": 4,
+      "qb_calls": 0
+    },
+    {
+      "file": "resources/purchase.query.ts",
+      "statements": 1,
+      "qb_calls": 0
+    },
+    {
+      "file": "resources/refund.command.ts",
+      "statements": 4,
+      "qb_calls": 0
+    },
+    {
+      "file": "resources/sales_report.query.ts",
+      "statements": 1,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "runtime",
+  "ast_metrics": "0.43.1"
+}

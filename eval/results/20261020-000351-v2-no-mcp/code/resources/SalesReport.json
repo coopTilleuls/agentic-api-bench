@@ -1,0 +1,17 @@
+{
+  "name": "SalesReport",
+  "formats": ["csv"],
+  "description": "Books sold between two days (UTC, inclusive), as CSV",
+  "operations": [
+    {"method": "GET", "path": "/reports/sales", "format": "csv", "query": "sales.query.ts"}
+  ],
+  "parameters": {
+    "from": {"in": "query", "type": "date", "required": true},
+    "to": {"in": "query", "type": "date", "required": true, "handler": "sales_period.handler.ts"}
+  },
+  "properties": {
+    "title": {"type": "string"},
+    "quantity": {"type": "integer"},
+    "revenueCents": {"type": "integer"}
+  }
+}

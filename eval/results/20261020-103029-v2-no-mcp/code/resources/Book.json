@@ -1,0 +1,38 @@
+{
+  "name": "Book",
+  "table": "book",
+  "query": "book.query.ts",
+  "command": "book.command.ts",
+  "itemsPerPage": 10,
+  "unknownInput": "ignore",
+  "input": {
+    "title": {"type": "string", "nullable": false, "minLength": 1},
+    "priceCents": {"type": "integer", "nullable": false, "min": 0},
+    "stock": {"type": "integer", "nullable": false, "min": 0}
+  },
+  "parameters": {
+    "title": {"in": "query", "filter": "ipartial"},
+    "author": {"in": "query", "filter": "exact", "property": "author.name"},
+    "priceCents": {"in": "query", "filter": "range"},
+    "publishedAt": {"in": "query", "filter": "date"},
+    "inStock": {"in": "query", "type": "boolean", "handler": "in_stock.handler.ts"},
+    "order": {"in": "query", "filter": "order", "properties": ["priceCents", "title", "publishedAt"]},
+    "itemsPerPage": {"in": "query", "type": "integer", "min": 1, "max": 50, "pagination": "itemsPerPage"}
+  },
+  "properties": {
+    "id": {"type": "integer", "identifier": true},
+    "title": {"type": "string"},
+    "priceCents": {"type": "integer", "column": "price_cents"},
+    "publishedAt": {"type": "date", "column": "published_at"},
+    "stock": {"type": "integer"},
+    "author": {"type": "object", "properties": {
+      "id": {"type": "integer"},
+      "name": {"type": "string"}
+    }}
+  },
+  "operations": [
+    {"method": "GET", "path": "/books"},
+    {"method": "GET", "path": "/books/{id}"},
+    {"method": "PATCH", "path": "/books/{id}"}
+  ]
+}

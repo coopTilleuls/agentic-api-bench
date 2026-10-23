@@ -1,0 +1,51 @@
+{
+  "imperative_files": 25,
+  "parse_failures": [],
+  "cc_total": 199,
+  "cc_max_file": 40,
+  "mi_avg": 84.36,
+  "mi_files": 20,
+  "lloc": 382,
+  "functions": 82,
+  "ast_metrics_network": "unshare",
+  "modified_whole": [],
+  "config_keys": 23,
+  "config_leaves": 16,
+  "config_files": 3,
+  "config_failures": [],
+  "sql_statements": 1,
+  "sql_joins": 2,
+  "sql_subqueries": 0,
+  "sql_where_predicates": 2,
+  "sql_tokens": 88,
+  "qb_calls": 47,
+  "sql_files": [
+    {
+      "file": "src/Api/ResourceMapper.php",
+      "statements": 0,
+      "qb_calls": 6
+    },
+    {
+      "file": "src/State/AuthorProvider.php",
+      "statements": 0,
+      "qb_calls": 8
+    },
+    {
+      "file": "src/State/BookProvider.php",
+      "statements": 0,
+      "qb_calls": 23
+    },
+    {
+      "file": "src/State/PurchaseProvider.php",
+      "statements": 0,
+      "qb_calls": 10
+    },
+    {
+      "file": "src/State/SalesReportProvider.php",
+      "statements": 1,
+      "qb_calls": 0
+    }
+  ],
+  "stack": "apiplatform",
+  "ast_metrics": "0.43.1"
+}

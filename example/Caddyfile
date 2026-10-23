@@ -1,0 +1,10 @@
+{
+	admin off
+}
+
+:8089 {
+	resource {
+		dir resources
+		dsn {$DATABASE_URL:postgres://llmapi:llmapi@127.0.0.1:54329/llmapi}
+	}
+}

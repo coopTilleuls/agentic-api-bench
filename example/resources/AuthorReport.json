@@ -1,0 +1,11 @@
+{
+  "name": "AuthorReport",
+  "description": "Published books per author.",
+  "operations": [
+    {"method": "GET", "path": "/business/export", "format": "csv", "query": "author_report.query.ts", "description": "CSV of published books per named author."}
+  ],
+  "properties": {
+    "author": {"type": "string", "filterable": true},
+    "published_books": {"type": "integer"}
+  }
+}
