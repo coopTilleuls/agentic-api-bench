@@ -12,6 +12,8 @@ A blank Claude Code agent (no skills, no plugins, no project instructions unless
 
 [`EXPERIMENT.md`](EXPERIMENT.md) is the full lab notebook: hypotheses, protocol, every batch, results and threats to validity.
 
+[`docs/harness.md`](docs/harness.md) explains how the runtime and the eval harness work: isolation, contexts, scoring, metrics.
+
 ## Layout
 
 | Path | What |
